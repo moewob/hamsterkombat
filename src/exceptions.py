@@ -314,7 +314,7 @@ def execute_combo(token):
 
 def read_combo_file():
     combo = []
-    combo_file_path = os.path.join(os.path.dirname(__file__), '../../data/combo.txt')
+    combo_file_path = os.path.join(os.path.dirname(__file__), '../data/combo.txt')
     with open(combo_file_path, 'r') as file:
         combo = file.read().splitlines()
     return combo
