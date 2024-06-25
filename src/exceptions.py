@@ -296,14 +296,13 @@ def execute_combo(token):
         return
     
     for combo_item in combo:
-        print_with_timestamp(f"{hijau}Trying to buy: {putih}{combo_item}\r", flush=True)
         if combo_item not in combo_log: 
-            status = buy_upgrade(token, combo_item, combo_item)
-            if status != 'success':
-                all_items_bought = False
-                print_with_timestamp(f"{merah}Failed to buy: {kuning}{combo_item} | Status: {status}\r", flush=True)
-                break
+            if not buy_upgrade(token, combo_item, combo_item):
+                combo_purchased = False
+                print_with_timestamp(f"{merah}failed to buy: {kuning}{combo_item}\r", flush=True)
+                break 
             else:
+                print_with_timestamp(f"{hijau}Success bought: {putih}{combo_item}\r", flush=True)
                 combo_log.add(combo_item)
                 print_with_timestamp(f"{hijau}Successfully bought: {putih}{combo_item}\r", flush=True)
 
