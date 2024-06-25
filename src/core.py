@@ -7,6 +7,7 @@ import locale
 from datetime import datetime
 import requests
 from colorama import *
+
 merah = Fore.LIGHTRED_EX
 putih = Fore.LIGHTWHITE_EX
 hijau = Fore.LIGHTGREEN_EX
@@ -27,7 +28,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.utils import load_tokens
+from src.utils import load_tokens, get_headers
 from src.auth import get_token, authenticate
 from src.exceptions import auto_upgrade_passive_earn, claim_daily, execute_tasks
 from src.exceptions import sync_clicker, tap_until_exhausted, execute_combo, claim_daily_cipher
@@ -123,6 +124,15 @@ def get_closest_match(user_input, valid_items):
     matches = difflib.get_close_matches(user_input, valid_items, n=1, cutoff=0.6)
     return matches[0] if matches else user_input
 
+def get_available_upgrades(token):
+    url = 'https://api.hamsterkombat.io/clicker/upgrades-for-buy'
+    headers = get_headers(token)
+    response = requests.post(url, headers=headers)
+    if response.status_code == 200:
+        return response.json()['upgradesForBuy']
+    else:
+        return []
+
 def set_combo():
     clear_screen()
     print_banner()
@@ -144,8 +154,12 @@ def set_combo():
     if choice == '1':
         print(kuning + f"\n   —— Enter the new combo items {Fore.WHITE}(3 items):")
         combo_items = []
-        with open('data/item.json', 'r') as file:
-            valid_items = json.load(file)["item"]
+        
+        init_data_list = load_tokens('tokens.txt')
+        token = get_token(init_data_list[0])  # Assuming you have tokens and using the first one
+        upgrades = get_available_upgrades(token)
+        valid_items = [upgrade['id'] for upgrade in upgrades]
+        
         for i in range(3):
             item = input(f"   —— Enter item {i+1}: ").strip().replace(" ", "_").lower()
             closest_match = get_closest_match(item, valid_items)
@@ -159,7 +173,6 @@ def set_combo():
         print(Fore.RED + Style.BRIGHT + "   —— Invalid choice. Please try again.")
         time.sleep(1)
         set_combo()
-
 
 def countdown_timer(seconds):
     while seconds:
@@ -258,5 +271,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-

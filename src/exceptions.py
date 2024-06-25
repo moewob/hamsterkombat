@@ -280,44 +280,62 @@ def claim_daily_combo(token):
     if response.status_code == 200:
         data = response.json()
         bonus_coins = data.get('dailyCombo', {}).get('bonusCoins', 0)
-        print_with_timestamp(f"{hijau}succesfully claim daily combo {kuning}+{format_number(bonus_coins)} coins.\r", flush=True)
+        print_with_timestamp(f"{hijau}Successfully claimed daily combo {kuning}+{format_number(bonus_coins)} coins.\r", flush=True)
         return True
     else:
-        print_with_timestamp(f"{merah}failed to claim daily combo {response.json()}\r", flush=True)
+        print_with_timestamp(f"{merah}Failed to claim daily combo {response.json()}\r", flush=True)
         return False
 
 def execute_combo(token):
     combo = read_combo_file()
     combo_log = read_combo_log(token)
-    combo_purchased = True
+    all_items_bought = True
 
     if 'DAILY_COMBO_DOUBLE_CLAIMED' in combo_log:
-        print_with_timestamp(f"{kuning}combo already claimed before\r", flush=True)
+        print_with_timestamp(f"{kuning}Combo already claimed before\r", flush=True)
         return
     
     for combo_item in combo:
+        print_with_timestamp(f"{hijau}Trying to buy: {putih}{combo_item}\r", flush=True)
         if combo_item not in combo_log: 
-            if not buy_upgrade(token, combo_item, combo_item):
-                combo_purchased = False
-                print_with_timestamp(f"{merah}failed to buy: {kuning}{combo_item}\r", flush=True)
-                break 
+            status = buy_upgrade(token, combo_item, combo_item)
+            if status != 'success':
+                all_items_bought = False
+                print_with_timestamp(f"{merah}Failed to buy: {kuning}{combo_item} | Status: {status}\r", flush=True)
+                break
             else:
                 combo_log.add(combo_item)
-    
-    if combo_purchased:
-        combo_log.add('DAILY_COMBO_DOUBLE_CLAIMED')
+                print_with_timestamp(f"{hijau}Successfully bought: {putih}{combo_item}\r", flush=True)
+
+    if all_items_bought and len(combo_log) == len(combo):
+        if claim_daily_combo(token):
+            combo_log.add('DAILY_COMBO_DOUBLE_CLAIMED')
         write_combo_log(token, combo_log)
-        claim_daily_combo(token)
     else:
+        print_with_timestamp(f"{merah}Combo purchase is not complete\r", flush=True)
         write_combo_log(token, combo_log)
-        print_with_timestamp(f"{merah}combo purchase is not complete\r", flush=True)
 
 def read_combo_file():
     combo = []
-    combo_file_path = os.path.join(os.path.dirname(__file__), '../../data/combo.txt')
+    combo_file_path = os.path.join(os.path.dirname(__file__), '../data/combo.txt')
     with open(combo_file_path, 'r') as file:
         combo = file.read().splitlines()
     return combo
+
+def read_combo_log(token):
+    log_file_path = os.path.join(os.path.dirname(__file__), f'../logs/combo_log_{token}.txt')
+    try:
+        with open(log_file_path, 'r') as file:
+            combo_log = set(file.read().splitlines())
+    except FileNotFoundError:
+        combo_log = set()
+    return combo_log
+
+def write_combo_log(token, combo_log):
+    log_file_path = os.path.join(os.path.dirname(__file__), f'../logs/combo_log_{token}.txt')
+    with open(log_file_path, 'w') as file:
+        for item in combo_log:
+            file.write(f"{item}\n")
         
 def claim_daily_cipher(token):
     url_claim = 'https://api.hamsterkombat.io/clicker/claim-daily-cipher'
