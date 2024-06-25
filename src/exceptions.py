@@ -298,7 +298,7 @@ def execute_combo(token):
     for combo_item in combo:
         if combo_item not in combo_log: 
             if not buy_upgrade(token, combo_item, combo_item):
-                combo_purchased = False
+                all_items_bought = False
                 print_with_timestamp(f"{merah}failed to buy: {kuning}{combo_item}\r", flush=True)
                 break 
             else:
