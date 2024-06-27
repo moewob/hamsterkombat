@@ -256,7 +256,7 @@ def main():
                             if daily_cipher_on:
                                 claim_daily_cipher(token)
                             if combo_upgrade:
-                                execute_combo(token)
+                                execute_combo(token, username)
                             if auto_buy_upgrade:
                                 auto_upgrade_passive_earn(token, upgrade_method)
                         else:

@@ -286,9 +286,9 @@ def claim_daily_combo(token):
         print_with_timestamp(f"{merah}Failed to claim daily combo {response.json()}\r", flush=True)
         return False
 
-def execute_combo(token):
+def execute_combo(token, username):
     combo = read_combo_file()
-    combo_log = read_combo_log(token)
+    combo_log = read_combo_log(username)
     all_items_bought = True
 
     if 'DAILY_COMBO_DOUBLE_CLAIMED' in combo_log:
@@ -297,22 +297,25 @@ def execute_combo(token):
     
     for combo_item in combo:
         if combo_item not in combo_log: 
+            print_with_timestamp(f"{hijau}Trying to buy: {putih}{combo_item}\r", flush=True)
             if not buy_upgrade(token, combo_item, combo_item):
                 all_items_bought = False
-                print_with_timestamp(f"{merah}failed to buy: {kuning}{combo_item}\r", flush=True)
+                print_with_timestamp(f"{merah}Failed to buy: {kuning}{combo_item}\r", flush=True)
                 break 
             else:
-                print_with_timestamp(f"{hijau}Success bought: {putih}{combo_item}\r", flush=True)
-                combo_log.add(combo_item)
                 print_with_timestamp(f"{hijau}Successfully bought: {putih}{combo_item}\r", flush=True)
+                combo_log.add(combo_item)
+        else:
+            print_with_timestamp(f"{kuning}Item already bought: {putih}{combo_item}\r", flush=True)
+
 
     if all_items_bought and len(combo_log) == len(combo):
         if claim_daily_combo(token):
             combo_log.add('DAILY_COMBO_DOUBLE_CLAIMED')
-        write_combo_log(token, combo_log)
+        write_combo_log(username, combo_log)
     else:
         print_with_timestamp(f"{merah}Combo purchase is not complete\r", flush=True)
-        write_combo_log(token, combo_log)
+        write_combo_log(username, combo_log)
 
 def read_combo_file():
     combo = []
@@ -321,12 +324,12 @@ def read_combo_file():
         combo = file.read().splitlines()
     return combo
 
-def read_combo_log(token):
+def read_combo_log(username):
     log_folder_path = os.path.join(os.path.dirname(__file__), '../logs')
     if not os.path.exists(log_folder_path):
         os.makedirs(log_folder_path)
     
-    log_file_path = os.path.join(log_folder_path, f'combo_log_{token}.txt')
+    log_file_path = os.path.join(log_folder_path, f'combo_log_{username}.txt')
     try:
         with open(log_file_path, 'r') as file:
             combo_log = set(file.read().splitlines())
@@ -334,12 +337,12 @@ def read_combo_log(token):
         combo_log = set()
     return combo_log
 
-def write_combo_log(token, combo_log):
+def write_combo_log(username, combo_log):
     log_folder_path = os.path.join(os.path.dirname(__file__), '../logs')
     if not os.path.exists(log_folder_path):
         os.makedirs(log_folder_path)
     
-    log_file_path = os.path.join(log_folder_path, f'combo_log_{token}.txt')
+    log_file_path = os.path.join(log_folder_path, f'combo_log_{username}.txt')
     with open(log_file_path, 'w') as file:
         for item in combo_log:
             file.write(f"{item}\n")
@@ -352,7 +355,7 @@ def claim_daily_cipher(token):
         cipher_word = file.read().strip()
     
     data = {"cipher": cipher_word}
-    print_with_timestamp(f"{hijau}today cipher / morse is {putih}'{cipher_word}'\r", flush=True)
+    print_with_timestamp(f"{hijau}today morse is {putih}'{cipher_word}'\r", flush=True)
     response_claim = requests.post(url_claim, headers=headers, json=data)
     
     if response_claim.status_code == 200:
