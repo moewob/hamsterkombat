@@ -322,7 +322,11 @@ def read_combo_file():
     return combo
 
 def read_combo_log(token):
-    log_file_path = os.path.join(os.path.dirname(__file__), f'../logs/combo_log_{token}.txt')
+    log_folder_path = os.path.join(os.path.dirname(__file__), '../logs')
+    if not os.path.exists(log_folder_path):
+        os.makedirs(log_folder_path)
+    
+    log_file_path = os.path.join(log_folder_path, f'combo_log_{token}.txt')
     try:
         with open(log_file_path, 'r') as file:
             combo_log = set(file.read().splitlines())
@@ -331,7 +335,11 @@ def read_combo_log(token):
     return combo_log
 
 def write_combo_log(token, combo_log):
-    log_file_path = os.path.join(os.path.dirname(__file__), f'../logs/combo_log_{token}.txt')
+    log_folder_path = os.path.join(os.path.dirname(__file__), '../logs')
+    if not os.path.exists(log_folder_path):
+        os.makedirs(log_folder_path)
+    
+    log_file_path = os.path.join(log_folder_path, f'combo_log_{token}.txt')
     with open(log_file_path, 'w') as file:
         for item in combo_log:
             file.write(f"{item}\n")
