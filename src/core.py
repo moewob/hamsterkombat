@@ -45,6 +45,7 @@ def print_banner():
     print(Fore.GREEN + Style.BRIGHT + banner + Style.RESET_ALL)
     print(hijau + "    Hamster Kombat Auto Bot")
     print(merah + f"    NOT FOR SALE = Free to use")
+    print(merah + f"    before start please '{hijau}git pull{merah}' to update bot")
 
 def get_status_text(status):
     if status:
