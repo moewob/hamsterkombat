@@ -1,6 +1,15 @@
 # Hamster Kombat Auto Farming Bot 
 This is a bot that can help you to run hamsterkombat telegram bot which has quite complete features with auto upgrade (3 methods), semi auto complete combo & semi auto complete daily cipher/morse.
 
+# Latest update (Summary) // 04-07-2024
+These changes enhance the script by adding a maximum price filter for upgrades, refining the upgrade process to avoid unnecessary error messages, and improving error handling in the buy_upgrade function. These updates ensure a smoother and more efficient upgrading experience in the Hamster Kombat Clicker game.
+
+The updated code introduces a max_price variable, setting it to 8 million. The filter now ensures that the upgrades are not only affordable but also within a maximum price limit of 5 million = 5000000.
+
+  ```bash
+max_price = 5000000
+upgrades_sorted = [u for u in upgrades if u['price'] <= balance_coins and u['price'] <= max_price]
+  ```
 ## Features
 - Auto Buy Upgrade (with 3 method options) - `ON/OFF`
 - Semi Auto Complete Daily Combo - `ON/OFF`
@@ -8,7 +17,7 @@ This is a bot that can help you to run hamsterkombat telegram bot which has quit
 - Auto Complete Tasks + Daily Checkin - `ON/OFF`
 - Auto Energy Boost (6x / day) - `Auto ON`
 
-##   Auto Upgrade metode
+##  Auto Upgrade metode
   1. Upgrade items with the **highest profit**
   2. Upgrade items at the **lowest price** `(low price with high profit)`
   3. Upgrade items with a **price less than balance**
