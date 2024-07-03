@@ -1,9 +1,8 @@
 from colorama import init, Fore, Style
 
-# Initialize colorama
 init(autoreset=True)
 
-def get_headers(token):
+def get_headers(token: str) -> dict:
     return {
         'Accept': '*/*',
         'Accept-Language': 'en-US,en;q=0.9',

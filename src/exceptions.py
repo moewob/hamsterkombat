@@ -8,26 +8,22 @@ import random
 import requests
 from colorama import *
 from src.utils import get_headers
-merah = Fore.LIGHTRED_EX
-putih = Fore.LIGHTWHITE_EX
-hijau = Fore.LIGHTGREEN_EX
-kuning = Fore.LIGHTYELLOW_EX
-biru = Fore.LIGHTBLUE_EX
+mrh = Fore.LIGHTRED_EX
+pth = Fore.LIGHTWHITE_EX
+hju = Fore.LIGHTGREEN_EX
+kng = Fore.LIGHTYELLOW_EX
+bru = Fore.LIGHTBLUE_EX
 reset = Style.RESET_ALL
-hitam = Fore.LIGHTBLACK_EX
+htm = Fore.LIGHTBLACK_EX
 
 def print_with_timestamp(message, **kwargs):
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     flush = kwargs.pop('flush', False)
     end = kwargs.pop('end', '\n')
-    print(f"{hitam}[{current_time}] {message}", flush=flush, end=end)
+    print(f"{htm}[{current_time}] {message}", flush=flush, end=end)
+
 def print_line():
-    print(putih + "~" * 60)
-
-LOG_DIR = 'logs/combo_logs'
-
-# Set the locale to use comma as thousand separator and dot as decimal separator
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+    print(pth + "~" * 60)
 
 def countdown_timer(seconds):
     while seconds:
@@ -36,28 +32,15 @@ def countdown_timer(seconds):
         jam = str(jam).zfill(2)
         menit = str(menit).zfill(2)
         detik = str(detik).zfill(2)
-        print(f"{Fore.WHITE}please wait until {jam}:{menit}:{detik} ", flush=True, end="\r")
+        print(f"{pth}please wait until {jam}:{menit}:{detik} ", flush=True, end="\r")
         seconds -= 1
         time.sleep(1)
     print("                          ", flush=True, end="\r")
 
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+
 def format_number(number):
     return locale.format_string("%d", number, grouping=True)
-
-def read_combo_log(token):
-    log_file = os.path.join(LOG_DIR, f'combo_log_{token[:9]}.txt')
-    combo_log = set()
-    if os.path.exists(log_file):
-        with open(log_file, 'r') as file:
-            combo_log = set(file.read().splitlines())
-    return combo_log
-
-def write_combo_log(token, combo_log):
-    if not os.path.exists(LOG_DIR):
-        os.makedirs(LOG_DIR)
-    log_file = os.path.join(LOG_DIR, f'combo_log_{token[:9]}.txt')
-    with open(log_file, 'w') as file:
-        file.write('\n'.join(combo_log))
 
 def sync_clicker(token):
     url = 'https://api.hamsterkombat.io/clicker/sync'
@@ -105,7 +88,7 @@ def tap_until_exhausted(token):
                 taps_to_perform = max_taps
                 response = tap(token, taps_to_perform, max_taps)
                 print_with_timestamp(
-                        f"{hijau}available to tap {putih}{format_number(available_taps)}\r"
+                        f"{hju}Available energy to tap {pth}{format_number(available_taps)}\r"
                     )
                 
                 if response.status_code == 200:
@@ -113,14 +96,14 @@ def tap_until_exhausted(token):
                     available_taps = clicker_data['clickerUser']['availableTaps']
 
                     print_with_timestamp(
-                        f"{hijau}success tapping, {putih}{format_number(available_taps)}{kuning} remaining\r"
+                        f"{hju}Success tapping, {pth}{format_number(available_taps)}{kng} remaining\r"
                     )
                 else:
-                    print_with_timestamp(f"{merah}taptap {kuning}failed to make a tap\r")
+                    print_with_timestamp(f"{mrh}Taptap {kng}failed to make a tap\r")
                     break
             break
         else:
-            print_with_timestamp(f"{merah}error {kuning}Unable to retrieve clicker data\r" + Style.RESET_ALL)
+            print_with_timestamp(f"{mrh}Error {kng}Unable to retrieve clicker data\r" + Style.RESET_ALL)
             break
 
 def claim_daily(token):
@@ -133,11 +116,11 @@ def claim_daily(token):
     data = response.json()
     if response.status_code == 200:
         if data['task']['completedAt']:
-            print_with_timestamp(f"{hijau}daily streaks {putih}already claimed\r" + Style.RESET_ALL)
+            print_with_timestamp(f"{hju}Daily streaks {pth}already claimed\r" + Style.RESET_ALL)
         else:
-            print_with_timestamp(f"{hijau}daily streaks {putih}claimed successfully\r" + Style.RESET_ALL)
+            print_with_timestamp(f"{hju}Daily streaks {pth}claimed successfully\r" + Style.RESET_ALL)
     else:
-        print_with_timestamp(f"{merah}daily streaks", data.get('error', 'Unknown error') + Style.RESET_ALL)
+        print_with_timestamp(f"{mrh}Daily streaks", data.get('error', 'Unknown error') + Style.RESET_ALL)
     return response
 
 def execute_tasks(token, cek_task_dict):
@@ -150,18 +133,18 @@ def execute_tasks(token, cek_task_dict):
             tasks = response.json()['tasks']
             all_completed = all(task['isCompleted'] or task['id'] == 'invite_friends' for task in tasks)
             if all_completed:
-                print_with_timestamp(f"{hijau}tasks: {kuning}all task claimed successfully\r", flush=True)
+                print_with_timestamp(f"{hju}Tasks {kng}all task claimed successfully\r", flush=True)
             else:
                 for task in tasks:
                     if not task['isCompleted']:
                         response = check_task(token, task['id'])
                         if response.status_code == 200 and response.json()['task']['isCompleted']:
-                            print_with_timestamp(f"{hijau}tasks: {putih}{task['id']}\r", flush=True)
-                            print_with_timestamp(f"{hijau}claim success & get {putih}+{task['rewardCoins']} coin\r", flush=True)
+                            print_with_timestamp(f"{hju}Tasks {pth}{task['id']}\r", flush=True)
+                            print_with_timestamp(f"{hju}Claim success & get {pth}+{task['rewardCoins']} coin\r", flush=True)
                         else:
-                            print_with_timestamp(f"{hijau}tasks: {merah}failed {putih}{task['id']}\r", flush=True)
+                            print_with_timestamp(f"{hju}Tasks {mrh}failed {pth}{task['id']}\r", flush=True)
         else:
-            print_with_timestamp(f"{hijau}tasks: {merah}failed to get list {putih}{response.status_code}\r", flush=True)
+            print_with_timestamp(f"{hju}Tasks {mrh}failed to get list {pth}{response.status_code}\r", flush=True)
 
 def upgrade(token, boost_type):
     url = 'https://api.hamsterkombat.io/clicker/boosts-for-buy'
@@ -178,14 +161,14 @@ def full_boost_tap(token):
     if response.status_code == 200:
         response_data = response.json()
         if 'cooldownSeconds' in response_data:
-            cooldown_seconds = response_data['cooldownSeconds']
-            print_with_timestamp(f"{merah}Failed ! boost cooldown: {kuning}{cooldown_seconds} seconds remaining.")
+            cooldown = response_data['cooldownSeconds']
+            print_with_timestamp(f"{mrh}Failed ! boost cooldown: {kng}{cooldown} seconds remaining.")
             return False
         else:
-            print_with_timestamp(f"{hijau}Boost {kuning}successfully applied!")
+            print_with_timestamp(f"{hju}Boost {kng}successfully applied!")
             return True
     else:
-        print_with_timestamp(f"{merah}Failed {kuning}boost on cooldown.")
+        print_with_timestamp(f"{mrh}Failed {kng}boost on cooldown or unavailable")
         return False
 
 def upgrade(token, upgrade_type):
@@ -202,27 +185,11 @@ def get_available_upgrades(token):
     headers = get_headers(token)
     response = requests.post(url, headers=headers)
     if response.status_code == 200:
-        print_with_timestamp(Fore.GREEN + Style.BRIGHT + f"succes to get upgrade list\r", flush=True)
+        print_with_timestamp(hju + f"Succes to get upgrade list\r", flush=True)
         return response.json()['upgradesForBuy']
     else:
-        print_with_timestamp(Fore.RED + Style.BRIGHT + f"failed to get upgrade list: {response.json()}\r", flush=True)
+        print_with_timestamp(mrh + f"Failed to get upgrade list: {response.json()}\r", flush=True)
         return []
-
-def buy_upgrade(token, upgrade_id, upgrade_name):
-    url = 'https://api.hamsterkombat.io/clicker/buy-upgrade'
-    headers = get_headers(token)
-    data = json.dumps({"upgradeId": upgrade_id, "timestamp": int(time.time())})
-    response = requests.post(url, headers=headers, data=data)
-    if response.status_code == 200:
-        return 'success'
-    else:
-        error_response = response.json()
-        if error_response.get('error_code') == 'INSUFFICIENT_FUNDS':
-            return 'insufficient_funds'
-        elif error_response.get('error_code') == 'UPGRADE_COOLDOWN':
-            return f"cooldown: {error_response.get('error_message')}"
-        else:
-            return f"error: {response.json()}"
 
 def auto_upgrade_passive_earn(token, upgrade_method):
     clicker_data = sync_clicker(token)
@@ -231,100 +198,148 @@ def auto_upgrade_passive_earn(token, upgrade_method):
         user_info = clicker_data['clickerUser']
         balance_coins = user_info['balanceCoins']
     else:
-        print(Fore.RED + Style.BRIGHT + f"failed to get user data\r", flush=True)
+        print(mrh + f"Failed to get user data\r", flush=True)
         return
 
     upgrades = get_available_upgrades(token)
     if not upgrades:
-        print(Fore.RED + Style.BRIGHT + f"\rfailed to get data or no upgrades available\r", flush=True)
+        print(mrh + f"\rFailed to get data or no upgrades available\r", flush=True)
         return
 
+    max_price = 5000000
     if upgrade_method == '1':
-        # Sort upgrades by profit per hour descending
         upgrades_sorted = sorted(upgrades, key=lambda x: (-x['profitPerHour'], x['price']))
     elif upgrade_method == '2':
-        # Sort upgrades by price ascending
         upgrades_sorted = sorted(upgrades, key=lambda x: x['price'])
     elif upgrade_method == '3':
-        # Filter upgrades to keep only those with a price less than or equal to balance_coins
-        upgrades_sorted = [u for u in upgrades if u['price'] <= balance_coins]
+        upgrades_sorted = [u for u in upgrades if u['price'] <= balance_coins and u['price'] <= max_price]
         if not upgrades_sorted:
-            print(Fore.RED + Style.BRIGHT + f"no upgrade available less than balance\r", flush=True)
+            print(mrh + f"No upgrade available less than balance\r", flush=True)
             return
     else:
-        print(Fore.RED + Style.BRIGHT + "Pilihan tidak valid\r", flush=True)
+        print(mrh + "Invalid option please try again", flush=True)
         return
 
     for upgrade in upgrades_sorted:
         if upgrade['isAvailable'] and not upgrade['isExpired']:
-            print_with_timestamp(f"{Fore.WHITE}{upgrade['name']} {Fore.GREEN}| cost : {Fore.YELLOW}{upgrade['price']}")
-            print_with_timestamp(f"{Fore.GREEN}trying to upgrade {Fore.WHITE}{upgrade['name']}", flush=True, end='\r')
-            status = buy_upgrade(token, upgrade['id'], upgrade['name'])
-            time.sleep(random.uniform(0.2, 0.5))
+            print_with_timestamp(f"{pth}{upgrade['name']} {hju}| cost : {kng}{upgrade['price']}")
+            print_with_timestamp(f"{hju}Trying to upgrade {pth}{upgrade['name']}", flush=True, end='\r')
+            status = buy_upgrade(token, upgrade['id'], upgrade['name'], upgrade['level'], upgrade['profitPerHour'])
             
-            if status == 'success':
-                print_with_timestamp(f"{Fore.GREEN}success | Level {Fore.WHITE}+{upgrade['level']} | +{Fore.YELLOW}{upgrade['profitPerHour']}{Fore.WHITE}/h         \r", flush=True)
-            elif status == 'insufficient_funds':
-                print_with_timestamp(f"{Fore.RED}not enough coin to upgrade                      \r", flush=True)
+            if status == 'insufficient_funds':
+                print_with_timestamp(f"{mrh}Not enough coin to upgrade                      \r", flush=True)
                 break
-            elif status.startswith('cooldown'):
-                print_with_timestamp(f"{Fore.RED}{status.split(': ')[1]}\r", flush=True)
+            elif status == 'success':
+                continue  # Skip to the next iteration if the upgrade is successful
             else:
-                print_with_timestamp(f"{Fore.RED}{status.split(': ')[1]}\r", flush=True)
+                print_with_timestamp(f"{hju}Upgrade {mrh}failed {hju}to {pth}level {upgrade['level']}                  \r", flush=True)
+   
+def buy_upgrade(token: str, upgrade_id: str, upgrade_name: str, level: int, profitPerHour: float) -> str:
+    url = 'https://api.hamsterkombat.io/clicker/buy-upgrade'
+    headers = get_headers(token)
+    data = json.dumps({"upgradeId": upgrade_id, "timestamp": int(time.time())})
+    response = requests.post(url, headers=headers, data=data)
+    if response.status_code == 200:
+        print_with_timestamp(f"{hju}Success | Level {pth}+{level} | +{kng}{profitPerHour}{pth}/h         \r", flush=True)
+        return 'success'
+    else:
+        error_response = response.json()
+        if error_response.get('error_code') == 'INSUFFICIENT_FUNDS':
+            print_with_timestamp(kng + f"Insufficient funds: {pth}{upgrade_name} ", flush=True)
+            return 'insufficient_funds'
+        elif error_response.get('error_code') == 'UPGRADE_COOLDOWN':
+            cooldown_time = error_response.get('cooldownSeconds')
+            print_with_timestamp(hju + f"Item {kng}cooldown for {pth}{cooldown_time} {kng}seconds.", flush=True)
+            return 'cooldown'
+        elif error_response.get('error_code') == 'UPGRADE_MAX_LEVEL':
+            error_messages = error_response.get('error_message')
+            print_with_timestamp(hju + f"{error_messages}", flush=True)
+            return 'max_level'
+        elif error_response.get('error_code') == 'UPGRADE_NOT_AVAILABLE':
+            error_messages = error_response.get('error_message')
+            print_with_timestamp(kng + f"{error_messages}.", flush=True)
+            return 'not_available'
+        elif error_response.get('error_code') == 'UPGRADE_HAS_EXPIRED':
+            error_messages = error_response.get('error_message')
+            print_with_timestamp(kng + f"Item {pth}{upgrade_name} {kng}has expired", flush=True)
+            return 'expired'
+        else:
+            print_with_timestamp(hju + f"{response.json()}", flush=True)
+            return 'error'
 
-
-def claim_daily_combo(token):
+def claim_daily_combo(token: str) -> bool:
     url = 'https://api.hamsterkombat.io/clicker/claim-daily-combo'
     headers = get_headers(token)
     response = requests.post(url, headers=headers)
     if response.status_code == 200:
         data = response.json()
         bonus_coins = data.get('dailyCombo', {}).get('bonusCoins', 0)
-        print_with_timestamp(f"{hijau}Successfully claimed daily combo {kuning}+{format_number(bonus_coins)} coins.\r", flush=True)
+        print_with_timestamp(f"{hju}Success claim combo {kng}+{bonus_coins} coins.\r")
         return True
+    elif response.status_code == 400:
+        error_response = response.json()
+        if error_response.get('error_code') == 'DAILY_COMBO_NOT_READY':
+            error_message = error_response.get('error_message')
+            print_with_timestamp(f"{kng}{error_message}\r")
+        else:
+            print_with_timestamp(f"{mrh}Failed to claim daily combo {response.json()}\r")
+        return False
     else:
-        print_with_timestamp(f"{merah}Failed to claim daily combo {response.json()}\r", flush=True)
+        print_with_timestamp(f"{mrh}Failed to claim daily combo {response.json()}\r")
         return False
 
-def execute_combo(token, username):
+def execute_combo(token: str, username: str):
     combo = read_combo_file()
     combo_log = read_combo_log(username)
-    all_items_bought = True
+    combo_purchased = True
 
     if 'DAILY_COMBO_DOUBLE_CLAIMED' in combo_log:
-        print_with_timestamp(f"{kuning}Combo already claimed before\r", flush=True)
+        print(kng + "Combo has already claimed before", flush=True)
         return
     
     for combo_item in combo:
-        if combo_item not in combo_log: 
-            print_with_timestamp(f"{hijau}Trying to buy: {putih}{combo_item}\r", flush=True)
-            if not buy_upgrade(token, combo_item, combo_item):
-                all_items_bought = False
-                print_with_timestamp(f"{merah}Failed to buy: {kuning}{combo_item}\r", flush=True)
-                break 
-            else:
-                print_with_timestamp(f"{hijau}Successfully bought: {putih}{combo_item}\r", flush=True)
-                combo_log.add(combo_item)
+        if combo_item in combo_log:
+            print_with_timestamp(pth + f"{combo_item} {kng}have purchased before", flush=True)
+            continue
+        
+        status = buy_upgrade(token, combo_item, combo_item)
+        if status == 'success':
+            combo_log.add(combo_item)
+        elif status == 'insufficient_funds':
+            combo_purchased = False
+            print_with_timestamp(mrh + f"Failed to buy {pth}{combo_item}", flush=True)
+            break
+        elif status == 'cooldown':
+            print_with_timestamp(mrh + f"Failed to buy {pth}{combo_item}", flush=True)
+        elif status == 'max_level':
+            print_with_timestamp(mrh + f"Failed to buy {pth}{combo_item}", flush=True)
+        elif status == 'not_available':
+            print_with_timestamp(mrh + f"Failed to buy {pth}{combo_item}", flush=True)
+        elif status == 'expired':
+            print_with_timestamp(mrh + f"Failed to buy {pth}{combo_item}", flush=True)
         else:
-            print_with_timestamp(f"{kuning}Item already bought: {putih}{combo_item}\r", flush=True)
-
-
-    if all_items_bought and len(combo_log) == len(combo):
+            print_with_timestamp(mrh + f"Failed to buy {pth}{combo_item}. Error: {status}.", flush=True)
+            break
+    
+    if combo_purchased:
         if claim_daily_combo(token):
+            print_with_timestamp(kng + "Successfully claimed daily combo.", flush=True)
             combo_log.add('DAILY_COMBO_DOUBLE_CLAIMED')
-        write_combo_log(username, combo_log)
+        else:
+            print_with_timestamp(mrh + "Failed to claim daily combo.", flush=True)
     else:
-        print_with_timestamp(f"{merah}Combo purchase is not complete\r", flush=True)
-        write_combo_log(username, combo_log)
+        print_with_timestamp(kng + "Incomplete combo purchase, switching.", flush=True)
+    
+    write_combo_log(username, combo_log)
 
-def read_combo_file():
+def read_combo_file() -> list:
     combo = []
     combo_file_path = os.path.join(os.path.dirname(__file__), '../data/combo.txt')
     with open(combo_file_path, 'r') as file:
         combo = file.read().splitlines()
     return combo
 
-def read_combo_log(username):
+def read_combo_log(username: str) -> set:
     log_folder_path = os.path.join(os.path.dirname(__file__), '../logs')
     if not os.path.exists(log_folder_path):
         os.makedirs(log_folder_path)
@@ -337,7 +352,7 @@ def read_combo_log(username):
         combo_log = set()
     return combo_log
 
-def write_combo_log(username, combo_log):
+def write_combo_log(username: str, combo_log: set):
     log_folder_path = os.path.join(os.path.dirname(__file__), '../logs')
     if not os.path.exists(log_folder_path):
         os.makedirs(log_folder_path)
@@ -346,7 +361,7 @@ def write_combo_log(username, combo_log):
     with open(log_file_path, 'w') as file:
         for item in combo_log:
             file.write(f"{item}\n")
-        
+   
 def claim_daily_cipher(token):
     url_claim = 'https://api.hamsterkombat.io/clicker/claim-daily-cipher'
     headers = get_headers(token)
@@ -355,23 +370,22 @@ def claim_daily_cipher(token):
         cipher_word = file.read().strip()
     
     data = {"cipher": cipher_word}
-    print_with_timestamp(f"{hijau}today morse is {putih}'{cipher_word}'\r", flush=True)
+    print_with_timestamp(f"{hju}today morse is {pth}'{cipher_word}'\r", flush=True)
     response_claim = requests.post(url_claim, headers=headers, json=data)
     
     if response_claim.status_code == 200:
         data = response_claim.json()
-        time.sleep(random.uniform(0.2, 1.1))
         if data.get('dailyCipher', {}).get('isClaimed', True):
             print_with_timestamp(
-                f"{hijau}successfully claim morse.\r", flush=True
+                f"{hju}Successfully claim morse.\r", flush=True
                 )
         else:
             print_with_timestamp(
-                f"{merah}failed to claim morse.\r", flush=True
+                f"{mrh}Failed to claim morse.\r", flush=True
                 )
             return False
     else:
         print_with_timestamp(
-            f"{kuning}already claim this morse before.\r", flush=True
+            f"{kng}Already claim this morse before.\r", flush=True
             )
         return False
