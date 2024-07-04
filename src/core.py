@@ -90,7 +90,7 @@ def set_daily_cipher():
     choice = input(f"\n   —— Enter your choice (1/2): ").strip()
     
     if choice == '1':
-        new_cipher = input("   ——  Enter the new daily cipher: ").strip()
+        new_cipher = input("   ——  Enter the new daily cipher (CAPITAL LETTER): ").strip()
         with open('data/cipher.txt', 'w') as file:
             file.write(new_cipher)
         print(Fore.GREEN + Style.BRIGHT + f"\n   —— Daily cipher updated successfully!\n")

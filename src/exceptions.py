@@ -185,7 +185,6 @@ def get_available_upgrades(token):
     headers = get_headers(token)
     response = requests.post(url, headers=headers)
     if response.status_code == 200:
-        print_with_timestamp(hju + f"Succes to get upgrade list\r", flush=True)
         return response.json()['upgradesForBuy']
     else:
         print_with_timestamp(mrh + f"Failed to get upgrade list: {response.json()}\r", flush=True)
@@ -302,8 +301,16 @@ def execute_combo(token: str, username: str):
             print_with_timestamp(pth + f"{combo_item} {kng}have purchased before", flush=True)
             continue
         
-        status = buy_upgrade(token, combo_item, combo_item)
+        # Retrieve upgrade details for the combo item
+        upgrades = get_available_upgrades(token)
+        upgrade_details = next((u for u in upgrades if u['id'] == combo_item), None)
+        if upgrade_details is None:
+            print_with_timestamp(mrh + f"Failed to find details for {pth}{combo_item}", flush=True)
+            continue
+        
+        status = buy_upgrade(token, combo_item, combo_item, upgrade_details['level'], upgrade_details['profitPerHour'])
         if status == 'success':
+            print_with_timestamp(hju + f"Executed combo {pth}{combo_item} ", flush=True)
             combo_log.add(combo_item)
         elif status == 'insufficient_funds':
             combo_purchased = False
@@ -377,15 +384,15 @@ def claim_daily_cipher(token):
         data = response_claim.json()
         if data.get('dailyCipher', {}).get('isClaimed', True):
             print_with_timestamp(
-                f"{hju}Successfully claim morse.\r", flush=True
+                f"{hju}Successfully claim morse.", flush=True
                 )
         else:
             print_with_timestamp(
-                f"{mrh}Failed to claim morse.\r", flush=True
+                f"{mrh}Failed to claim morse.", flush=True
                 )
             return False
     else:
         print_with_timestamp(
-            f"{kng}Already claim this morse before.\r", flush=True
+            f"{kng}Already claim this morse before.", flush=True
             )
         return False
