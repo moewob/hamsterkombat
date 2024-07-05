@@ -293,7 +293,7 @@ def execute_combo(token: str, username: str):
     combo_purchased = True
 
     if 'DAILY_COMBO_DOUBLE_CLAIMED' in combo_log:
-        print(kng + "Combo has already claimed before", flush=True)
+        print_with_timestamp(kng + "Combo has already claimed before", flush=True)
         return
     
     for combo_item in combo:

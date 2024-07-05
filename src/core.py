@@ -156,6 +156,14 @@ def set_combo():
             combo_items.append(closest_match)
         with open('data/combo.txt', 'w') as file:
             file.write(f"\n".join(combo_items))
+        
+                # Delete all combo_log files in the logs folder
+        logs_folder = 'logs'
+        for filename in os.listdir(logs_folder):
+            if filename.startswith('combo_log') and filename.endswith('.txt'):
+                file_path = os.path.join(logs_folder, filename)
+                os.remove(file_path)
+
         print(Fore.GREEN + Style.BRIGHT + f"\n   —— Combo updated successfully! ——\n")
     elif choice == '2':
         return
