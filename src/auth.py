@@ -4,12 +4,12 @@ from src.utils import get_headers
 from colorama import Fore, Style
 
 def get_token(init_data_raw):
-    url = 'https://api.hamsterkombat.io/auth/auth-by-telegram-webapp'
+    url = 'https://api.hamsterkombatgame.io/auth/auth-by-telegram-webapp'
     headers = {
         'Accept-Language': 'en-US,en;q=0.9',
         'Connection': 'keep-alive',
-        'Origin': 'https://hamsterkombat.io',
-        'Referer': 'https://hamsterkombat.io/',
+        'Origin': 'https://hamsterkombatgame.io',
+        'Referer': 'https://hamsterkombatgame.io/',
         'Sec-Fetch-Dest': 'empty',
         'Sec-Fetch-Mode': 'cors',
         'Sec-Fetch-Site': 'same-site',
@@ -18,11 +18,11 @@ def get_token(init_data_raw):
         'content-type': 'application/json'
     }
     data = json.dumps({"initDataRaw": init_data_raw})
-    response = requests.post(url, headers=headers, data=data)
-    if response.status_code == 200:
-        return response.json()['authToken']
+    res = requests.post(url, headers=headers, data=data)
+    if res.status_code == 200:
+        return res.json()['authToken']
     else:
-        error_data = response.json()
+        error_data = res.json()
         if "invalid" in error_data.get("error_code", "").lower():
             print(Fore.RED + Style.BRIGHT + "\rFailed Get Token. Invalid init data", flush=True)
         else:
@@ -30,10 +30,10 @@ def get_token(init_data_raw):
         return None
 
 def authenticate(token):
-    url = 'https://api.hamsterkombat.io/auth/me-telegram'
+    url = 'https://api.hamsterkombatgame.io/auth/me-telegram'
     headers = get_headers(token)
-    response = requests.post(url, headers=headers)
+    res = requests.post(url, headers=headers)
     
-    if response.status_code != 200:
-        print(Fore.RED + Style.BRIGHT + f"Gagal login token : {token[:4]}********* | Status Code: {response.status_code} | Response: {response.text}")
-    return response
+    if res.status_code != 200:
+        print(Fore.RED + Style.BRIGHT + f"Token Failed : {token[:4]}********* | Status : {res.status_code} | res: {res.text}")
+    return res
