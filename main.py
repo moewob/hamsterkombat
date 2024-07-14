@@ -8,7 +8,7 @@ from src.core import _banner, main
 
 if __name__ == "__main__":
     try:
-        print_banner()
+        _banner()
         main()
     except KeyboardInterrupt:
         sys.exit()
