@@ -68,7 +68,7 @@ def show_upgrade_menu():
     choice = input("   —— Enter your choice (1/2/3/4):")
     return choice
 
-def current_cipher():
+def get_current_cipher():
     try:
         with open('data/cipher.txt', 'r') as file:
             return file.read().strip()
@@ -78,7 +78,7 @@ def current_cipher():
 def set_cipher():
     _clear()
     _banner()
-    current_cipher = current_cipher()
+    current_cipher = get_current_cipher()
     print(f"\n{hju}   Active Menu {kng}'Auto Complete Daily Cipher' ")
     print(htm + "   " + "~" * 50)
     print(f"{kng}\n   Current cipher:")
