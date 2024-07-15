@@ -1,7 +1,11 @@
-import requests
 import json
+from colorama import *
+from requests_html import HTMLSession
+from fake_useragent import UserAgent
 from src.utils import get_headers
-from colorama import Fore, Style
+
+session = HTMLSession()
+ua = UserAgent()
 
 def get_token(init_data_raw):
     url = 'https://api.hamsterkombatgame.io/auth/auth-by-telegram-webapp'
@@ -13,12 +17,13 @@ def get_token(init_data_raw):
         'Sec-Fetch-Dest': 'empty',
         'Sec-Fetch-Mode': 'cors',
         'Sec-Fetch-Site': 'same-site',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36',
+        'User-Agent': ua.random,
         'accept': 'application/json',
         'content-type': 'application/json'
     }
     data = json.dumps({"initDataRaw": init_data_raw})
-    res = requests.post(url, headers=headers, data=data)
+    res = session.post(url, headers=headers, data=data)
+    
     if res.status_code == 200:
         return res.json()['authToken']
     else:
@@ -32,7 +37,7 @@ def get_token(init_data_raw):
 def authenticate(token):
     url = 'https://api.hamsterkombatgame.io/auth/me-telegram'
     headers = get_headers(token)
-    res = requests.post(url, headers=headers)
+    res = session.post(url, headers=headers)
     
     if res.status_code != 200:
         print(Fore.RED + Style.BRIGHT + f"Token Failed : {token[:4]}********* | Status : {res.status_code} | res: {res.text}")

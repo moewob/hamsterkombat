@@ -1,6 +1,6 @@
-from colorama import init, Fore, Style
+from fake_useragent import UserAgent
 
-init(autoreset=True)
+ua = UserAgent()
 
 def get_headers(token: str) -> dict:
     return {
@@ -13,7 +13,7 @@ def get_headers(token: str) -> dict:
         'Sec-Fetch-Dest': 'empty',
         'Sec-Fetch-Mode': 'cors',
         'Sec-Fetch-Site': 'same-site',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+        'User-Agent': ua.random,
         'Content-Type': 'application/json'
     }
 

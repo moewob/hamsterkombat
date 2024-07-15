@@ -1,14 +1,13 @@
 import os
-import sys
 import json
 import time
+import base64
 import locale
 from datetime import datetime
-import random
 import requests
 from colorama import *
 from src.utils import get_headers
-from src.__init__ import mrh, pth, hju, kng, bru, reset, htm
+from src.__init__ import read_config, mrh, pth, hju, kng, bru, reset, htm
 
 def log(message, **kwargs):
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -35,6 +34,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 def _number(number):
     return locale.format_string("%d", number, grouping=True)
+
 
 def clicker_config(token):
     url = 'https://api.hamsterkombatgame.io/clicker/config'
@@ -136,21 +136,21 @@ def execute(token, cek_task_dict):
             tasks = res.json()['tasks']
             all_completed = all(task['isCompleted'] or task['id'] == 'invite_friends' for task in tasks)
             if all_completed:
-                log(f"{hju}Tasks {kng}all task claimed successfully\r", flush=True)
+                log(f"{kng}All task has been claimed successfully\r", flush=True)
             else:
                 for task in tasks:
                     if not task['isCompleted']:
                         res = _check(token, task['id'])
                         if res.status_code == 200 and res.json()['task']['isCompleted']:
                             log(f"{hju}Tasks {pth}{task['id']}\r", flush=True)
-                            log(f"{hju}Claim success & get {pth}+{task['rewardCoins']} coin\r", flush=True)
+                            log(f"{hju}Claim success get {pth}+{task['rewardCoins']} coin\r", flush=True)
                         else:
                             log(f"{hju}Tasks {mrh}failed {pth}{task['id']}\r", flush=True)
         else:
             log(f"{hju}Tasks {mrh}failed to get list {pth}{res.status_code}\r", flush=True)
 
-def upgrade(token, boost_type):
-    url = 'https://api.hamsterkombatgame.io/clicker/boosts-for-buy'
+def apply_boost(token, boost_type):
+    url = 'https://api.hamsterkombatgame.io/clicker/buy-boost'
     headers = get_headers(token)
     headers['accept'] = 'application/json'
     headers['content-type'] = 'application/json'
@@ -160,7 +160,7 @@ def upgrade(token, boost_type):
 
 def boost(token):
     boost_type = "BoostFullAvailableTaps"
-    res = upgrade(token, boost_type)
+    res = apply_boost(token, boost_type)
     if res.status_code == 200:
         res_data = res.json()
         if 'cooldownSeconds' in res_data:
@@ -174,15 +174,6 @@ def boost(token):
         log(f"{kng}boost on cooldown or unavailable")
         return False
 
-def upgrade(token, upgrade_type):
-    url = 'https://api.hamsterkombatgame.io/clicker/buy-boost'
-    headers = get_headers(token)
-    headers['accept'] = 'application/json'
-    headers['content-type'] = 'application/json'
-    data = json.dumps({"boostId": upgrade_type, "timestamp": int(time.time())})
-    res = requests.post(url, headers=headers, data=data)
-    return res
-
 def available_upgrades(token):
     url = 'https://api.hamsterkombatgame.io/clicker/upgrades-for-buy'
     headers = get_headers(token)
@@ -194,8 +185,10 @@ def available_upgrades(token):
         return []
 
 def upgrade_passive(token, _method):
-    clicker_data = _sync(token)
+    config = read_config()
+    max_price = config.get('max_price', 10000000)
 
+    clicker_data = _sync(token)
     if 'clickerUser' in clicker_data:
         user_info = clicker_data['clickerUser']
         balance_coins = user_info['balanceCoins']
@@ -208,11 +201,18 @@ def upgrade_passive(token, _method):
         log(mrh + f"\rFailed to get data or no upgrades available\r", flush=True)
         return
 
-    max_price = 5000000
+    log(hju + f"Total upgrades available: {pth}{len(upgrades)}", flush=True)
+
     if _method == '1':
-        upg_sort = sorted(upgrades, key=lambda x: (-x['profitPerHour'], x['price']))
+        upg_sort = sorted(
+            [u for u in upgrades if u['price'] <= max_price],
+            key=lambda x: -x['profitPerHour']
+        )
     elif _method == '2':
-        upg_sort = sorted(upgrades, key=lambda x: x['price'])
+        upg_sort = sorted(
+            [u for u in upgrades if u['price'] <= max_price],
+            key=lambda x: x['price']
+        )
     elif _method == '3':
         upg_sort = [u for u in upgrades if u['price'] <= balance_coins and u['price'] <= max_price]
         if not upg_sort:
@@ -222,6 +222,14 @@ def upgrade_passive(token, _method):
         log(mrh + "Invalid option please try again", flush=True)
         return
 
+    log(hju + f"Total under max price: {pth}{len(upg_sort)}", flush=True)
+
+    if not upg_sort:
+        log(kng + f"No upgrades available under the max price of {max_price}\r", flush=True)
+        return
+
+    upgrades_purchased = False
+
     for upgrade in upg_sort:
         if upgrade['isAvailable'] and not upgrade['isExpired']:
             log(f"{pth}{upgrade['name']} {hju}| cost : {kng}{upgrade['price']}")
@@ -229,46 +237,55 @@ def upgrade_passive(token, _method):
             status = buy_upgrade(token, upgrade['id'], upgrade['name'], upgrade['level'], upgrade['profitPerHour'])
             
             if status == 'insufficient_funds':
-                log(f"{mrh}Not enough coin to upgrade                      \r", flush=True)
+                log(f"{mrh}Not enough coin to upgrade                  \r", flush=True)
                 break
             elif status == 'success':
-                continue  # Skip to the next iteration if the upgrade is successful
+                upgrades_purchased = True
+                continue
             else:
                 log(f"{hju}Upgrade {mrh}failed {hju}to {pth}level {upgrade['level']}                  \r", flush=True)
-   
+                continue
+    if not upgrades_purchased:
+        log(bru + f"Not available under max price of {max_price}\r", flush=True)
+
+
 def buy_upgrade(token: str, upgrade_id: str, upgrade_name: str, level: int, profitPerHour: float) -> str:
     url = 'https://api.hamsterkombatgame.io/clicker/buy-upgrade'
     headers = get_headers(token)
     data = json.dumps({"upgradeId": upgrade_id, "timestamp": int(time.time())})
     res = requests.post(url, headers=headers, data=data)
+    config = read_config()
+    delayUpgrade = config.get('delayUpgrade', 3)
     if res.status_code == 200:
-        log(f"{hju}Success | Level {pth}+{level} | +{kng}{profitPerHour}{pth}/h         \r", flush=True)
+        log(f"{hju}Success | Level {pth}+{level} | +{kng}{profitPerHour}{pth}/h              \r", flush=True)
+        time.sleep(delayUpgrade)
         return 'success'
     else:
+        time.sleep(delayUpgrade)
         error_res = res.json()
         if error_res.get('error_code') == 'INSUFFICIENT_FUNDS':
-            log(kng + f"Insufficient funds: {pth}{upgrade_name} ", flush=True)
+            log(kng + f"Insufficient funds: {pth}{upgrade_name}       ", flush=True)
             return 'insufficient_funds'
         elif error_res.get('error_code') == 'UPGRADE_COOLDOWN':
             cooldown_time = error_res.get('cooldownSeconds')
-            log(hju + f"Item {kng}cooldown for {pth}{cooldown_time} {kng}seconds.", flush=True)
+            log(bru + f"Card {kng}cooldown for {pth}{cooldown_time} {kng}seconds.          ", flush=True)
             return 'cooldown'
         elif error_res.get('error_code') == 'UPGRADE_MAX_LEVEL':
             error_messages = error_res.get('error_message')
-            log(hju + f"{error_messages}", flush=True)
+            log(bru + f"{error_messages}  ", flush=True)
             return 'max_level'
         elif error_res.get('error_code') == 'UPGRADE_NOT_AVAILABLE':
             error_messages = error_res.get('error_message')
-            log(kng + f"{error_messages}.", flush=True)
+            log(kng + f"{error_messages}.      ", flush=True)
             return 'not_available'
         elif error_res.get('error_code') == 'UPGRADE_HAS_EXPIRED':
             error_messages = error_res.get('error_message')
-            log(kng + f"Item {pth}{upgrade_name} {kng}has expired", flush=True)
+            log(kng + f"Card {pth}{upgrade_name} {kng}has expired       ", flush=True)
             return 'expired'
         else:
-            log(hju + f"{res.json()}", flush=True)
+            log(hju + f"{res.json()}       ", flush=True)
             return 'error'
-
+   
 def claim_daily_combo(token: str) -> bool:
     url = 'https://api.hamsterkombatgame.io/clicker/claim-daily-combo'
     headers = get_headers(token)
@@ -290,70 +307,79 @@ def claim_daily_combo(token: str) -> bool:
         log(f"{mrh}Failed to claim daily combo {res.json()}\r")
         return False
 
+def get_combo_cards() -> dict:
+    url = 'https://api21.datavibe.top/api/GetCombo'
+    payload = {}
+    try:
+        response = requests.post(url, json=payload)
+        response.raise_for_status()  
+        data = response.json()
+
+        current_date = datetime.now().strftime('%d-%m-%y')
+        data['date'] = current_date
+        
+        return data
+    except requests.exceptions.RequestException as e:
+        log(f"Failed getting Combo Cards. Error: {e}")
+        return None
+
 def execute_combo(token: str, username: str):
-    combo = read_combo_file()
+    combo_data = get_combo_cards()
+    combo = combo_data.get('combo', []) if combo_data else []
+
     combo_log = read_combo_log(username)
     combo_purchased = True
 
     if 'DAILY_COMBO_DOUBLE_CLAIMED' in combo_log:
-        log(kng + "Combo has already claimed before", flush=True)
+        log(kng + f"Combo has already claimed before", flush=True)
         return
-    
+
     for combo_item in combo:
         if combo_item in combo_log:
-            log(pth + f"{combo_item} {kng}have purchased before", flush=True)
+            log(pth + f"{combo_item} {kng}have purchased", flush=True)
             continue
-        
-        # Retrieve upgrade details for the combo item
+
         upgrades = available_upgrades(token)
         upgrade_details = next((u for u in upgrades if u['id'] == combo_item), None)
         if upgrade_details is None:
             log(mrh + f"Failed to find details for {pth}{combo_item}", flush=True)
             continue
-        
+
         status = buy_upgrade(token, combo_item, combo_item, upgrade_details['level'], upgrade_details['profitPerHour'])
         if status == 'success':
             log(hju + f"Executed combo {pth}{combo_item} ", flush=True)
             combo_log.add(combo_item)
         elif status == 'insufficient_funds':
             combo_purchased = False
-            log(mrh + f"Failed to buy {pth}{combo_item}", flush=True)
+            log(mrh + f"Executed combo {pth}{combo_item}", flush=True)
             break
         elif status == 'cooldown':
-            log(mrh + f"Failed to buy {pth}{combo_item}", flush=True)
+            log(mrh + f"Executed combo {pth}{combo_item}", flush=True)
         elif status == 'max_level':
-            log(mrh + f"Failed to buy {pth}{combo_item}", flush=True)
+            log(mrh + f"Executed combo {pth}{combo_item}", flush=True)
         elif status == 'not_available':
-            log(mrh + f"Failed to buy {pth}{combo_item}", flush=True)
+            log(mrh + f"Executed combo {pth}{combo_item}", flush=True)
         elif status == 'expired':
-            log(mrh + f"Failed to buy {pth}{combo_item}", flush=True)
+            log(mrh + f"Executed combo {pth}{combo_item}", flush=True)
         else:
-            log(mrh + f"Failed to buy {pth}{combo_item}. Error: {status}.", flush=True)
+            log(mrh + f"Executed {pth}{combo_item}. Error: {status}.", flush=True)
             break
-    
+
     if combo_purchased:
         if claim_daily_combo(token):
-            log(kng + "Successfully claimed daily combo.", flush=True)
             combo_log.add('DAILY_COMBO_DOUBLE_CLAIMED')
         else:
-            log(mrh + "Failed to claim daily combo.", flush=True)
+            log(mrh + f"Failed to claim daily combo.", flush=True)
     else:
-        log(kng + "Incomplete combo purchase, switching.", flush=True)
-    
-    write_combo_log(username, combo_log)
+        log(kng + f"Incomplete combo purchase.", flush=True)
 
-def read_combo_file() -> list:
-    combo = []
-    combo_file_path = os.path.join(os.path.dirname(__file__), '../data/combo.txt')
-    with open(combo_file_path, 'r') as file:
-        combo = file.read().splitlines()
-    return combo
+    write_combo_log(username, combo_log)
 
 def read_combo_log(username: str) -> set:
     log_folder_path = os.path.join(os.path.dirname(__file__), '../logs')
     if not os.path.exists(log_folder_path):
         os.makedirs(log_folder_path)
-    
+
     log_file_path = os.path.join(log_folder_path, f'combo_log_{username}.txt')
     try:
         with open(log_file_path, 'r') as file:
@@ -366,36 +392,39 @@ def write_combo_log(username: str, combo_log: set):
     log_folder_path = os.path.join(os.path.dirname(__file__), '../logs')
     if not os.path.exists(log_folder_path):
         os.makedirs(log_folder_path)
-    
+
     log_file_path = os.path.join(log_folder_path, f'combo_log_{username}.txt')
     with open(log_file_path, 'w') as file:
         for item in combo_log:
             file.write(f"{item}\n")
-   
+
+def decode_cipher(cipher: str):
+    encoded = cipher[:3] + cipher[4:]
+    return base64.b64decode(encoded).decode('utf-8')
+  
 def claim_cipher(token):
     url = 'https://api.hamsterkombatgame.io/clicker/claim-daily-cipher'
     headers = get_headers(token)
+    game_config = clicker_config(token)
+    daily_cipher = game_config.get('dailyCipher')
     
-    with open('data/cipher.txt', 'r') as file:
-        cipher_word = file.read().strip()
-    
-    data = {"cipher": cipher_word}
-    log(f"{hju}today morse is {pth}'{cipher_word}'\r", flush=True)
+    if not daily_cipher or daily_cipher.get('isClaimed', True) or not daily_cipher.get('cipher'):
+        log(f"{kng}No valid cipher or already claimed.", flush=True)
+        return False
+
+    decoded_cipher = decode_cipher(cipher=daily_cipher['cipher'])
+    data = {"cipher": decoded_cipher}
+    log(f"{hju}Today morse is {pth}'{decoded_cipher}'\r", flush=True)
+
     res_claim = requests.post(url, headers=headers, json=data)
     
     if res_claim.status_code == 200:
-        data = res_claim.json()
-        if data.get('dailyCipher', {}).get('isClaimed', True):
-            log(
-                f"{hju}Successfully claim morse.", flush=True
-                )
+        if res_claim.json().get('dailyCipher', {}).get('isClaimed', True):
+            log(f"{hju}Successfully claimed morse.", flush=True)
+            return True
         else:
-            log(
-                f"{mrh}Failed to claim morse.", flush=True
-                )
-            return False
+            log(f"{mrh}Failed to claim morse.", flush=True)
     else:
-        log(
-            f"{kng}Already claim this morse before.", flush=True
-            )
-        return False
+        log(f"{kng}Failed to claim daily morse. Status code: {res_claim.status_code}", flush=True)
+    
+    return False
