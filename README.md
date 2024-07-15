@@ -6,21 +6,27 @@ This is a bot that can help you to run hamsterkombat telegram bot which has quit
 0x705C71fc031B378586695c8f888231e9d24381b4
 ```
 
-# Latest update (Summary) // 04-07-2024
-These changes enhance the script by adding a maximum price filter for upgrades, refining the upgrade process to avoid unnecessary error messages, and improving error handling in the buy_upgrade function. These updates ensure a smoother and more efficient upgrading experience in the Hamster Kombat Clicker game.
+# Latest update (Summary) // 16-07-2024
+These changes enhance the script by adding a `maximum price filter` for upgrades `FULL Auto Complete Daily Combo`, `FULL Auto Complete Daily Morse`, `Fake userAgent` , refining the upgrade process to avoid unnecessary error messages, and improving error handling in the buy_upgrade function. These updates ensure a smoother and more efficient upgrading experience in the Hamster Kombat Clicker game.
 
-The updated code introduces a max_price variable, setting it to 8 million. The filter now ensures that the upgrades are not only affordable but also within a maximum price limit of 5 million = 5000000.
+The updated code introduces a max_price variable, setting it to 3 million. The filter now ensures that the upgrades are not only affordable but also within a maximum price limit of 3 million = 3000000.
 
   ```bash
-max_price = 5000000
-upgrades_sorted = [u for u in upgrades if u['price'] <= balance_coins and u['price'] <= max_price]
+{
+    "max_price": 3000000,
+    "delayUpgrade": 1,
+    "DelayPerAccount": 5,
+    "loop": 3600
+}
   ```
 ## Features
-- Auto Buy Upgrade (with 3 method options) - `ON/OFF`
-- Semi Auto Complete Daily Combo - `ON/OFF`
-- Semi Auto Complete Daily Morse - `ON/OFF`
-- Auto Complete Tasks + Daily Checkin - `ON/OFF`
+- Auto Buy Upgrade (with 3 method options) - `ON/OFF` `enhanced` on `16-07-2024`
+- Auto Complete Daily Combo - `ON/OFF` `enhanced` on `16-07-2024`
+- Auto Complete Daily Morse - `ON/OFF` `enhanced` on `16-07-2024`
+- Auto Complete Tasks - `ON/OFF`
 - Auto Energy Boost (6x / day) - `Auto ON`
+- Random UserAgent - `Auto ON`
+- By default without config will execute `Taps, Boost & Daily Streak`
 
 ##  Auto Upgrade metode
   1. Upgrade items with the **highest profit**
@@ -75,11 +81,6 @@ after that run the kombat hamster bot by writing the command
 ```bash
 python main.py
 ```
-
-## Loop
-Default Countdown = 3600 seconds = 1 Hours / Loop
-
-You can change the loop time when all tokens have been successfully run by opening the `/hamsterkombat/src/core.py` file then search for `countdown_timer(3600)` and change the value `(3600)` as you wish in seconds.  
 
 ## Screenshoot
 ![image](https://github.com/jawikas/hamsterkombat/assets/63976518/de33ad9f-f5ea-451e-a9ac-bce8d525e28f)
