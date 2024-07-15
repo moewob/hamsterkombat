@@ -1,4 +1,0 @@
-eth_pairs
-product_team
-call_btc_rise
-DAILY_COMBO_DOUBLE_CLAIMED
