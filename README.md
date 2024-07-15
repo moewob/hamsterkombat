@@ -1,5 +1,5 @@
 # Hamster Kombat Auto Farming Bot 
-This is a bot that can help you to run hamsterkombat telegram bot which has quite complete features with auto upgrade (3 methods), semi auto complete combo & semi auto complete daily cipher/morse.
+This is a bot that can help you to run hamsterkombat telegram bot which has quite complete features with auto upgrade (3 methods), auto complete combo & auto complete daily cipher/morse.
 
 ### Buy me Coffee ☕ 
 ```
