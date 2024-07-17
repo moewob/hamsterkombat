@@ -1,13 +1,13 @@
 import sys
-import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from src.core import _banner, main
+from src.core import main
+from src.__init__ import _banner, log, mrh
 
 if __name__ == "__main__":
-    try:
-        _banner()
-        main()
-    except KeyboardInterrupt:
-        sys.exit()
+    while True:
+        try:
+            _banner()
+            main()
+        except KeyboardInterrupt:
+            log(mrh + f"Successfully logged out of the bot\n")
+            sys.exit()
