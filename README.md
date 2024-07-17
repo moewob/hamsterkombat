@@ -9,14 +9,18 @@ This is a bot that can help you to run hamsterkombat telegram bot which has quit
 # Latest update (Summary) // 16-07-2024
 These changes enhance the script by adding a `maximum price filter` for upgrades `FULL Auto Complete Daily Combo`, `FULL Auto Complete Daily Morse`, `Fake userAgent` , refining the upgrade process to avoid unnecessary error messages, and improving error handling in the buy_upgrade function. These updates ensure a smoother and more efficient upgrading experience in the Hamster Kombat Clicker game.
 
-The updated code introduces a max_price variable, setting it to 3 million. The filter now ensures that the upgrades are not only affordable but also within a maximum price limit of 3 million = 3000000.
+The updated code introduces a max_price variable, setting it to 5 million. The filter now ensures that the upgrades are not only affordable but also within a maximum price limit of 5 million = 5000000.
 
+Add configuration setting on `config.json`
   ```bash
 {
-    "max_price": 3000000,
+    "max_price": 5000000,
     "delayUpgrade": 1,
     "DelayPerAccount": 5,
-    "loop": 3600
+    "min_tap": 1138,
+    "max_tap": 2388,
+    "tap_delay": 1,
+    "loop": 1600
 }
   ```
 ## Features
