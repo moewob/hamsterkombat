@@ -1,9 +1,9 @@
 {
-    "max_price": 5000000,
+    "min_tap": 138,
+    "max_tap": 738,
     "delayUpgrade": 1,
     "DelayPerAccount": 5,
-    "min_tap": 1138,
-    "max_tap": 2388,
-    "tap_delay": 1,
+    "tapDelay": true,
+    "max_price": 5000000,
     "loop": 1600
 }

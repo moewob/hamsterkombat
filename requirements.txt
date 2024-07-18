@@ -1,5 +1,5 @@
 requests
 colorama
 fake-useragent
-lxml-html-clean
 requests-html
+lxml-html-clean

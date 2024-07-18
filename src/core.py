@@ -60,8 +60,6 @@ def show_upgrade_menu():
     choice = input(" Enter your choice (1/2/3/4): ")
     return choice
 
-req_timeout = 30
-
 def main():
     auto_upgrade = False
     combo_upgrade = False
@@ -95,7 +93,7 @@ def main():
                         token = get_token(init_data)
                         if token:
                             try:
-                                res = authenticate(token, timeout=req_timeout)
+                                res = authenticate(token)
                                 if res.status_code == 200:
                                     user_data = res.json()
                                     username = user_data.get('telegramUser', {}).get('username', 'Please set username first')
@@ -111,25 +109,25 @@ def main():
                                         log(hju + f"Balance: {pth}{_number(balance_coins)}")
                                         log(hju + f"Income: {pth}{_number(earn_passive_per_hour)}/h")
                                         log(hju + f"CEO of {pth}{exchange_name} {hju}exchange")
-                                    claim_daily(token, timeout=req_timeout)
+                                    claim_daily(token)
                                     while True:
-                                        exhausted(token, timeout=req_timeout)
-                                        if not boost(token, timeout=req_timeout):
+                                        exhausted(token)
+                                        if not boost(token):
                                             break
                                     if tasks_on:
-                                        execute(token, cek_task_dict, timeout=req_timeout)
+                                        execute(token, cek_task_dict)
                                     if daily_cipher_on:
-                                        claim_cipher(token, timeout=req_timeout)
+                                        claim_cipher(token)
                                     if combo_upgrade:
-                                        execute_combo(token, timeout=req_timeout)
+                                        execute_combo(token)
                                     if auto_upgrade:
-                                        upgrade_passive(token, _method, timeout=req_timeout)  
+                                        upgrade_passive(token, _method)  
                                 log_line()
                                 countdown_timer(countPerAccount)
                             except requests.RequestException as e:
-                                log(f"Request exception for token {token[:4]}****: {str(e)}")
+                                log(mrh + f"Request exception for token {pth}{token[:4]}****: {str(e)}")
                         else:
-                            log(f"Failed to login token {token[:4]}*********\n", flush=True)
+                            log(mrh + f"Failed to login token {pth}{token[:4]}*********\n", flush=True)
                     countdown_timer(loop)
             elif choice == '6':
                 log(mrh + f"Successfully logged out of the bot\n")
@@ -138,8 +136,8 @@ def main():
                 log("Invalid choice. Please try again.")
             time.sleep(1)
         except Exception as e:
-            log(f"An error occurred in the main loop: {str(e)}")
-            time.sleep(10)
+            log(mrh + f"An error occurred in the main loop: {kng}{str(e)}")
+            countdown_timer(10)
 
 if __name__ == '__main__':
     main()

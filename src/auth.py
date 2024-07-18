@@ -34,7 +34,7 @@ def get_token(init_data_raw):
             print(Fore.RED + Style.BRIGHT + f"\rFailed Get Token. {error_data}", flush=True)
         return None
 
-def authenticate(token, timeout=None):
+def authenticate(token):
     url = 'https://api.hamsterkombatgame.io/auth/me-telegram'
     headers = get_headers(token)
     res = session.post(url, headers=headers)

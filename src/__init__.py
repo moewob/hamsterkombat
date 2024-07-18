@@ -64,7 +64,7 @@ def countdown_timer(seconds):
         print(f"{pth}please wait until {h}:{m}:{s} ", flush=True, end="\r")
         seconds -= 1
         time.sleep(1)
-    print("                          ", flush=True, end="\r")
+    print(f"{pth}please wait until {h}:{m}:{s} ", flush=True, end="\r")
 
 def _number(number):
     return locale.format_string("%d", number, grouping=True)
