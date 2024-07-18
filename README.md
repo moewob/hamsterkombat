@@ -11,15 +11,16 @@ These changes enhance the script by adding a `maximum price filter` for upgrades
 
 The updated code introduces a max_price variable, setting it to 5 million. The filter now ensures that the upgrades are not only affordable but also within a maximum price limit of 5 million = 5000000.
 
-Add configuration setting on `config.json`
+Add configuration setting on `config.json` 
+bool | tapDelay : true or false 
   ```bash
 {
-    "max_price": 5000000,
+    "min_tap": 138,
+    "max_tap": 738,
     "delayUpgrade": 1,
     "DelayPerAccount": 5,
-    "min_tap": 1138,
-    "max_tap": 2388,
-    "tap_delay": 1,
+    "tapDelay": true,
+    "max_price": 5000000,
     "loop": 1600
 }
   ```
