@@ -15,13 +15,13 @@ Add configuration setting on `config.json`
 bool | tapDelay : true or false 
   ```bash
 {
-    "min_tap": 138,
-    "max_tap": 738,
-    "delayUpgrade": 1,
-    "DelayPerAccount": 5,
+    "min_tap": 438,
+    "max_tap": 1200,
+    "DelayPerAccount": true,
     "tapDelay": true,
+    "delayUpgrade": 1,
     "max_price": 5000000,
-    "loop": 1600
+    "loop": 3800
 }
   ```
 ## Features

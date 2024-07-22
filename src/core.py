@@ -131,7 +131,7 @@ def main():
                     countdown_timer(loop)
             elif choice == '6':
                 log(mrh + f"Successfully logged out of the bot\n")
-                sys.exit()
+                break
             else:
                 log("Invalid choice. Please try again.")
             time.sleep(1)

@@ -160,16 +160,6 @@ def boost(token):
         time.sleep(1)
         return False
 
-def available_upgrades(token):
-    url = 'https://api.hamsterkombatgame.io/clicker/upgrades-for-buy'
-    headers = get_headers(token)
-    res = requests.post(url, headers=headers)
-    if res.status_code == 200:
-        return res.json()['upgradesForBuy']
-    else:
-        log(mrh + f"Failed to get upgrade list: {res.json()}\r", flush=True)
-        return []
-
 def upgrade_passive(token, _method):
     max_price = config.get('max_price', 10000000)
 
@@ -236,21 +226,64 @@ def upgrade_passive(token, _method):
     if not upgrades_purchased:
         log(bru + f"Not available under max price of {max_price}\r", flush=True)
 
+def claim_daily_combo(token: str) -> dict:
+    url = 'https://api.hamsterkombatgame.io/clicker/claim-daily-combo'
+    headers = get_headers(token)
+    res = requests.post(url, headers=headers)
+    if res.status_code == 200:
+        data = res.json()
+        bonus_coins = data.get('dailyCombo', {}).get('bonusCoins', 0)
+        log(hju + f"Daily combo reward {pth}+{_number(bonus_coins)}")
+        return data
+    else:
+        error_res = res.json()
+        error_code = error_res.get('error_code')
+        if error_code == 'DAILY_COMBO_NOT_READY':
+            log(mrh + "Daily combo not ready.")
+        elif error_code == 'DAILY_COMBO_DOUBLE_CLAIMED':
+            log(kng + "Combo has already been claimed")
+        else:
+            log(mrh + f"Failed to claim daily combo {error_res}")
+        return error_res
+
+def get_combo_cards() -> dict:
+    url = 'https://api21.datavibe.top/api/GetCombo'
+    try:
+        response = requests.post(url)
+        response.raise_for_status()
+        data = response.json()
+        data['date'] = datetime.now().strftime('%d-%m-%y')
+        return data
+    except requests.exceptions.RequestException as e:
+        log(f"Failed getting Combo Cards. Error: {e}")
+        return None
+
+def available_upgrades(token):
+    url = 'https://api.hamsterkombatgame.io/clicker/upgrades-for-buy'
+    headers = get_headers(token)
+    res = requests.post(url, headers=headers)
+    if res.status_code == 200:
+        return res.json()['upgradesForBuy']
+    else:
+        log(mrh + f"Failed to get upgrade list: {res.json()}\r", flush=True)
+        return []
 
 def buy_upgrade(token: str, upgrade_id: str, upgrade_name: str, level: int, profitPerHour: float, price: float) -> str:
     url = 'https://api.hamsterkombatgame.io/clicker/buy-upgrade'
     headers = get_headers(token)
     data = json.dumps({"upgradeId": upgrade_id, "timestamp": int(time.time())})
     res = requests.post(url, headers=headers, data=data)
-    delayUpgrade = config.get('delayUpgrade', 3)
+    delayUpgrade = config.get('delayUpgrade', False)
     log(bru + f"Card {hju}name {pth}{upgrade_name}           \r", flush=True)
     log(bru + f"Card {hju}price{pth} {_number(price)}          \r", flush=True)
     if res.status_code == 200:
         log(hju + f"Success {bru}| Level {pth}+{level} | +{kng}{_number(profitPerHour)}{pth}/h         \r", flush=True)
-        time.sleep(delayUpgrade)
+        if delayUpgrade:
+            countdown_timer(randint(2, 6))
+        else:
+            time.sleep(0.3)
         return 'success'
     else:
-        time.sleep(delayUpgrade)
         error_res = res.json()
         if error_res.get('error_code') == 'INSUFFICIENT_FUNDS':
             log(mrh + f"Insufficient {kng}funds for this card       ", flush=True)
@@ -271,77 +304,35 @@ def buy_upgrade(token: str, upgrade_id: str, upgrade_name: str, level: int, prof
         else:
             log(kng + f"{res.json()}       ", flush=True)
             return 'error'
-   
-def claim_daily_combo(token: str) -> dict:
-    url = 'https://api.hamsterkombatgame.io/clicker/claim-daily-combo'
-    headers = get_headers(token)
-    res = requests.post(url, headers=headers)
-    if res.status_code == 200:
-        data = res.json()
-        bonus_coins = data.get('dailyCombo', {}).get('bonusCoins', 0)
-        log(hju + f"Daily combo reward {pth}+{bonus_coins}")
-        return data
-    elif res.status_code == 400:
-        error_res = res.json()
-        error_code = error_res.get('error_code')
-        if error_code == 'DAILY_COMBO_NOT_READY':
-            time.sleep(1)
-        elif error_code == 'DAILY_COMBO_DOUBLE_CLAIMED':
-            log(kng + "Combo has already been claimed before")
-        else:
-            log(mrh + f"Failed to claim daily combo {error_res}\r")
-        return error_res
-    else:
-        log(mrh + f"Failed to claim daily combo {res.json()}\r")
-        return None
-
-def get_combo_cards() -> dict:
-    url = 'https://api21.datavibe.top/api/GetCombo'
-    payload = {}
-    try:
-        response = requests.post(url, json=payload)
-        response.raise_for_status()
-        data = response.json()
-        current_date = datetime.now().strftime('%d-%m-%y')
-        data['date'] = current_date
-        return data
-    except requests.exceptions.RequestException as e:
-        log(f"Failed getting Combo Cards. Error: {e}")
-        return None
 
 def execute_combo(token: str):
     combo_data = get_combo_cards()
     if not combo_data:
-        log("Failed to retrieve combo data.")
-        return None
-
-    daily_combo_data = claim_daily_combo(token)
-    if daily_combo_data and 'error_code' in daily_combo_data and daily_combo_data['error_code'] == 'DAILY_COMBO_DOUBLE_CLAIMED':
+        log(mrh + "Failed to retrieve combo data.")
         return
 
-    if daily_combo_data and 'error_code' in daily_combo_data and daily_combo_data['error_code'] == 'DAILY_COMBO_NOT_READY':
-        not_ready_combo = daily_combo_data['error_message'].split(':')[-1].strip()
-        not_ready_combo = not_ready_combo.split(',')
-    else:
-        not_ready_combo = []
+    not_ready_combo = []
+    daily_combo_data = claim_daily_combo(token)
+    if daily_combo_data and 'error_code' in daily_combo_data:
+        if daily_combo_data['error_code'] == 'DAILY_COMBO_NOT_READY':
+            not_ready_combo = daily_combo_data['error_message'].split(':')[-1].strip().split(',')
+        elif daily_combo_data['error_code'] == 'DAILY_COMBO_DOUBLE_CLAIMED':
+            return
 
     combo = combo_data.get('combo', [])
     if not combo:
-        log("No combo data available.")
-        return None
+        log(mrh + "No combo data available.")
+        return
 
     upgrades = available_upgrades(token)
-    combo_purchased = True
-
     for combo_item in combo:
         if combo_item in not_ready_combo:
-            log(bru + f"Already {kng}executed {pth}{combo_item}")
+            log(bru + f"Already executed {combo_item}", flush=True)
             continue
 
         upgrade_details = next((u for u in upgrades if u['id'] == combo_item), None)
-
         if upgrade_details is None:
-            log(f"Failed to find details {combo_item}")
+            log(mrh + f"Failed to find details {combo_item}", flush=True)
             continue
 
         status = buy_upgrade(
@@ -353,22 +344,12 @@ def execute_combo(token: str):
             upgrade_details['price']
         )
         if status == 'success':
-            log(hju +  f"Executed {kng}combo {pth}{combo_item}")
+            log(bru + f"Executed combo {combo_item}", flush=True)
             time.sleep(1)
         else:
-            log(mrh + f"Fail {kng}execute {pth}{combo_item}")
-            combo_purchased = False
+            log(mrh + f"Execute failed {combo_item}", flush=True)
+            time.sleep(2)
             break
-
-    if combo_purchased:
-        claim_result = claim_daily_combo(token)
-        if claim_result.get("status") == "success":
-            log(hju + f"Successfully claimed daily combo.")
-        else:
-            log(mrh + "Failed to claim daily combo.")
-    else:
-        log(mrh + "Failed to complete combo purchases.")
-        time.sleep(3)
 
 def decode_cipher(cipher: str):
     encoded = cipher[:3] + cipher[4:]
