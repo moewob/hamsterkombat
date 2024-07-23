@@ -17,10 +17,10 @@ bool | tapDelay : true or false
 {
     "min_tap": 438,
     "max_tap": 1200,
-    "DelayPerAccount": true,
+    "DelayPerAccount": 5,
     "tapDelay": true,
-    "delayUpgrade": 1,
-    "max_price": 5000000,
+    "delayUpgrade": false,
+    "max_price": 1000000,
     "loop": 3800
 }
   ```
