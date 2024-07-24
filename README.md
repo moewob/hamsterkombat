@@ -1,33 +1,30 @@
 # Hamster Kombat Auto Farming Bot 
-This is a bot that can help you to run hamsterkombat telegram bot which has quite complete features with auto upgrade (3 methods), auto complete combo & auto complete daily cipher/morse.
+This is a bot that can help you to run hamsterkombat telegram bot which has quite complete features with auto upgrade (3 methods), auto complete combo, auto complete daily cipher, auto complete Mini Game & auto complete tasks.
 
-### Buy me Coffee ☕ 
-```
-0x705C71fc031B378586695c8f888231e9d24381b4
-```
-
-# Latest update (Summary) // 16-07-2024
-These changes enhance the script by adding a `maximum price filter` for upgrades `FULL Auto Complete Daily Combo`, `FULL Auto Complete Daily Morse`, `Fake userAgent` , refining the upgrade process to avoid unnecessary error messages, and improving error handling in the buy_upgrade function. These updates ensure a smoother and more efficient upgrading experience in the Hamster Kombat Clicker game.
-
-The updated code introduces a max_price variable, setting it to 5 million. The filter now ensures that the upgrades are not only affordable but also within a maximum price limit of 5 million = 5000000.
+# Latest update // 25-07-2024
+These changes enhance the script by adding a `Maximum Price Filter Include on Upgrade & Combo` for upgrades `FULL Auto Complete Daily Combo`, `FULL Auto Complete Daily Morse`, `FULL Auto Complete Minigame`, `Fake userAgent` , refining the upgrade process to avoid unnecessary error messages, and improving error handling in the buy_upgrade function. These updates ensure a smoother and more efficient upgrading experience in the Hamster Kombat Clicker game.
 
 Add configuration setting on `config.json` 
-bool | tapDelay : true or false 
+**bool** | tapDelay : `true` or `false` 
+**bool** | ClaimKeysDelay : `true` or `false` 
+**bool** | delayUpgrade : `true` or `false` 
   ```bash
 {
-    "min_tap": 438,
-    "max_tap": 1200,
+    "min_tap": 1038,
+    "max_tap": 1800,
     "DelayPerAccount": 5,
     "tapDelay": true,
+    "ClaimKeysDelay": true,
     "delayUpgrade": false,
-    "max_price": 1000000,
+    "max_price": 5000000,
     "loop": 3800
 }
   ```
 ## Features
-- Auto Buy Upgrade (with 3 method options) - `ON/OFF` `enhanced` on `16-07-2024`
-- Auto Complete Daily Combo - `ON/OFF` `enhanced` on `16-07-2024`
+- Auto Buy Upgrade (with 3 method options) - `ON/OFF` `enhanced` on `25-07-2024`
+- Auto Complete Daily Combo - `ON/OFF` `enhanced` on `25-07-2024`
 - Auto Complete Daily Morse - `ON/OFF` `enhanced` on `16-07-2024`
+- Auto Complete Mini Game - `ON/OFF` `NEW`
 - Auto Complete Tasks - `ON/OFF`
 - Auto Energy Boost (6x / day) - `Auto ON`
 - Random UserAgent - `Auto ON`
@@ -35,7 +32,7 @@ bool | tapDelay : true or false
 
 ##  Auto Upgrade metode
   1. Upgrade items with the **highest profit**
-  2. Upgrade items at the **lowest price** `(low price with high profit)`
+  2. Upgrade items at the **lowest price**
   3. Upgrade items with a **price less than balance**
 
 ## Prerequisites
@@ -97,4 +94,10 @@ This project is licensed under the `NONE` License.
 If you have any questions or suggestions, please feel free to contact us at [ https://t.me/itsjaw_real ].
 
 ## Thanks to
-Template based by akasakaid - https://github.com/akasakaid
+Template based by - https://github.com/akasakaid
+Source code by YOU 💘
+
+### Buy me Coffee ☕ 
+```
+0x705C71fc031B378586695c8f888231e9d24381b4 - EVM
+```
