@@ -24,9 +24,9 @@ Add configuration setting on `config.json`
 }
   ```
 ## Features
-- Auto Buy Upgrade (with 3 method options) - `ON/OFF` `enhanced` on `25-07-2024`
-- Auto Complete Daily Combo - `ON/OFF` `enhanced` on `25-07-2024`
-- Auto Complete Daily Morse - `ON/OFF` `enhanced` on `16-07-2024`
+- Auto Buy Upgrade (with 3 method options) - `ON/OFF` enhanced on `25-07-2024`
+- Auto Complete Daily Combo - `ON/OFF` enhanced on `25-07-2024`
+- Auto Complete Daily Morse - `ON/OFF` enhanced on `16-07-2024`
 - Auto Complete Mini Game - `ON/OFF` `NEW`
 - Auto Complete Tasks - `ON/OFF`
 - Auto Energy Boost (6x / day) - `Auto ON`
@@ -98,7 +98,8 @@ If you have any questions or suggestions, please feel free to contact us at [ ht
 
 ## Thanks to
 Template based by - https://github.com/akasakaid
-Source code by YOU 💘
+
+Full Source code by YOU 💘 (users of this scripts)
 
 ### Buy me Coffee ☕ 
 ```
