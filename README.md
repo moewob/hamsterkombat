@@ -5,8 +5,11 @@ This is a bot that can help you to run hamsterkombat telegram bot which has quit
 These changes enhance the script by adding a `Maximum Price Filter Include on Upgrade & Combo` for upgrades `FULL Auto Complete Daily Combo`, `FULL Auto Complete Daily Morse`, `FULL Auto Complete Minigame`, `Fake userAgent` , refining the upgrade process to avoid unnecessary error messages, and improving error handling in the buy_upgrade function. These updates ensure a smoother and more efficient upgrading experience in the Hamster Kombat Clicker game.
 
 Add configuration setting on `config.json` 
+
 **bool** | tapDelay : `true` or `false` 
+
 **bool** | ClaimKeysDelay : `true` or `false` 
+
 **bool** | delayUpgrade : `true` or `false` 
   ```bash
 {
