@@ -180,8 +180,8 @@ def upgrade_passive(token, _method):
 
     if _method == '1':
         upg_sort = sorted(
-            [u for u in upgrades if u['price'] <= max_price],
-            key=lambda x: -x['profitPerHour']
+            [u for u in upgrades if u['price'] <= max_price and u['price'] > 0],
+            key=lambda x: -x['profitPerHour'] / x['price'] if x['price'] > 0 else 0
         )
     elif _method == '2':
         upg_sort = sorted(
@@ -307,6 +307,8 @@ def buy_upgrade(token: str, upgrade_id: str, upgrade_name: str, level: int, prof
 
 def execute_combo(token: str):
     combo_data = get_combo_cards()
+    combo_purchased = True
+    max_price = config.get('max_price',50000000)
     if not combo_data:
         log(mrh + "Failed to retrieve combo data.")
         return
@@ -331,6 +333,12 @@ def execute_combo(token: str):
             continue
 
         upgrade_details = next((u for u in upgrades if u['id'] == combo_item), None)
+        upgrade_price_dict = next((u for u in upgrades if u['price']), None)
+        if upgrade_price_dict:
+            upgrade_price = upgrade_price_dict['price']
+            if upgrade_price > max_price:
+                log(kng + f"Price combo is over max price")
+                return
         if upgrade_details is None:
             log(mrh + f"Failed to find details {combo_item}", flush=True)
             continue
@@ -344,12 +352,17 @@ def execute_combo(token: str):
             upgrade_details['price']
         )
         if status == 'success':
-            log(bru + f"Executed combo {combo_item}", flush=True)
+            log(bru + f"Executed combo {pth}{combo_item}", flush=True)
             time.sleep(1)
         else:
-            log(mrh + f"Execute failed {combo_item}", flush=True)
-            time.sleep(2)
+            combo_purchased = False
+            log(mrh + f"Execute combo {pth}{combo_item}", flush=True)
+            time.sleep(1)
             break
+    if combo_purchased:
+        claim_daily_combo(token)
+    else:
+        log(kng + f"Combo not fully purchased ", flush=True)
 
 def decode_cipher(cipher: str):
     encoded = cipher[:3] + cipher[4:]
@@ -381,3 +394,47 @@ def claim_cipher(token):
         log(f"{kng}Failed to claim daily morse. Status code: {res_claim.status_code}", flush=True)
     
     return False
+
+def claim_key(token):
+    headers = get_headers(token)
+    ClaimKeysDelay = config.get('ClaimKeysDelay', False)
+    sync_response = requests.post("https://api.hamsterkombatgame.io/clicker/sync", headers=headers)
+    user_id = str(sync_response.json()["clickerUser"]["id"])
+    encoded_cipher = base64.b64encode(f"0300000000|{user_id}".encode()).decode()
+    start_response = requests.post("https://api.hamsterkombatgame.io/clicker/start-keys-minigame", headers=headers)
+    
+    if start_response.status_code == 400:
+        error_response = start_response.json()
+        if error_response.get("error_code") == "KEYS-MINIGAME_WAITING":
+            log(kng + f"Likely you have claimed key's before")
+            return
+        else:
+            log(mrh + f"Failed to start keys minigame: {start_response.status_code}, {start_response.text}")
+            return
+
+    log(bru + f"Checking Minigame {kng}please wait..")
+    if ClaimKeysDelay:
+        countdown_timer(randint(7, 15))
+    else:
+        time.sleep(0.3)
+    
+    claim_response = requests.post(
+        "https://api.hamsterkombatgame.io/clicker/claim-daily-keys-minigame",
+        headers=headers,
+        json={"cipher": encoded_cipher}
+    )
+    if claim_response.status_code == 200:
+        response_json = claim_response.json()
+        balance_keys = response_json['clickerUser']['balanceKeys']
+        bonus_keys = response_json['dailyKeysMiniGame']['bonusKeys']
+        log(hju + f"Balance Keys: {pth}{balance_keys}")
+        log(hju + f"Solved Minigame Bonus Keys: +{kng}{bonus_keys}")
+        return
+    elif claim_response.status_code == 400:
+        log(kng + f"Already claimed today's key before")
+        return
+    else:
+        error_message = claim_response.json().get("error_message", "Unknown Error")
+        log(mrh + f"Failed to claim daily keys minigame: {claim_response.status_code}, {error_message}")
+        return
+ 

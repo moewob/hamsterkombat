@@ -6,7 +6,7 @@ from colorama import *
 from src.utils import load_tokens
 from src.auth import get_token, authenticate
 from src.exceptions import upgrade_passive, claim_daily, execute, boost, clicker_config
-from src.exceptions import _sync, exhausted, execute_combo, claim_cipher
+from src.exceptions import _sync, exhausted, execute_combo, claim_cipher, claim_key
 
 from src.__init__ import (
     mrh, pth, hju, kng, htm, bru,  reset, 
@@ -21,7 +21,7 @@ config = read_config()
 def get_status(status):
     return Fore.GREEN + "ON" + Style.RESET_ALL if status else Fore.RED + "OFF" + Style.RESET_ALL
 
-def show_menu(auto_upgrade, combo_upgrade, daily_cipher_on, tasks_on):
+def show_menu(auto_upgrade, combo_upgrade, daily_cipher_on, claim_key_on, tasks_on):
     _clear()
     _banner()
     menu = f"""
@@ -29,9 +29,10 @@ def show_menu(auto_upgrade, combo_upgrade, daily_cipher_on, tasks_on):
 {kng}  1.{reset} Auto Buy Upgrade           : {get_status(auto_upgrade)}
 {kng}  2.{reset} Auto Complete Combo        : {get_status(combo_upgrade)}
 {kng}  3.{reset} Auto Complete Cipher       : {get_status(daily_cipher_on)}
-{kng}  4.{reset} Auto Complete Tasks        : {get_status(tasks_on)}
-{kng}  5.{reset} {hju}Start Bot {kng}(default){reset}
-{kng}  6.{reset} {mrh}Exit{reset}
+{kng}  4.{reset} Auto Complete Mini Game    : {get_status(claim_key_on)}
+{kng}  5.{reset} Auto Complete Tasks        : {get_status(tasks_on)}
+{kng}  6.{reset} {hju}Start Bot {kng}(default){reset}
+{kng}  7.{reset} {mrh}Exit{reset}
 
 {kng} [INFO]{reset} By default will do {hju}taps, boost & streak{reset}
     """
@@ -49,7 +50,7 @@ def show_upgrade_menu():
 {hju} Active Menu {kng}'Auto Buy Upgrade'{reset}
 {htm} {'~' * 50}{reset}
 {kng} Upgrade Method:{reset}
-{kng} 1. {pth}highest profit{reset}
+{kng} 1. {pth}highest profit {hju}[ enchanced ]{reset}
 {kng} 2. {pth}lowest price{reset}
 {kng} 3. {pth}price less than balance{reset}
 {kng} 4. {pth}back to {bru}main menu{reset}
@@ -64,6 +65,7 @@ def main():
     auto_upgrade = False
     combo_upgrade = False
     daily_cipher_on = False
+    claim_key_on = False
     tasks_on = False
 
     cek_task_dict = {}
@@ -72,7 +74,7 @@ def main():
 
     while True:
         try:
-            choice = show_menu(auto_upgrade, combo_upgrade, daily_cipher_on, tasks_on)
+            choice = show_menu(auto_upgrade, combo_upgrade, daily_cipher_on, claim_key_on, tasks_on)
             if choice == '1':
                 auto_upgrade = not auto_upgrade
                 if auto_upgrade:
@@ -84,8 +86,10 @@ def main():
             elif choice == '3':
                 daily_cipher_on = not daily_cipher_on
             elif choice == '4':
-                tasks_on = not tasks_on
+                claim_key_on = not claim_key_on
             elif choice == '5':
+                tasks_on = not tasks_on
+            elif choice == '6':
                 while True:
                     init_data_list = load_tokens('tokens.txt')
                     
@@ -118,6 +122,8 @@ def main():
                                         execute(token, cek_task_dict)
                                     if daily_cipher_on:
                                         claim_cipher(token)
+                                    if claim_key_on:    
+                                        claim_key(token)
                                     if combo_upgrade:
                                         execute_combo(token)
                                     if auto_upgrade:
@@ -129,7 +135,7 @@ def main():
                         else:
                             log(mrh + f"Failed to login token {pth}{token[:4]}*********\n", flush=True)
                     countdown_timer(loop)
-            elif choice == '6':
+            elif choice == '7':
                 log(mrh + f"Successfully logged out of the bot\n")
                 break
             else:
