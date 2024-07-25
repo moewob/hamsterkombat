@@ -1,6 +1,13 @@
 # Hamster Kombat Auto Farming Bot 
 This is a bot that can help you to run hamsterkombat telegram bot which has quite complete features with auto upgrade (3 methods), auto complete combo, auto complete daily cipher, auto complete Mini Game & auto complete tasks.
 
+### Buy me Coffee ☕ 
+```
+0x705C71fc031B378586695c8f888231e9d24381b4 - EVM
+TDTtTc4hSnK9ii1VDudZij8FVK2ZtwChja - TRON
+UQBy7ICXV6qFGeFTRWSpnMtoH6agYF3PRa5nufcTr3GVOPri - TON
+```
+
 # Latest update // 25-07-2024
 These changes enhance the script by adding a `Maximum Price Filter Include on Upgrade & Combo` for upgrades `FULL Auto Complete Daily Combo`, `FULL Auto Complete Daily Morse`, `FULL Auto Complete Minigame`, `Fake userAgent` , refining the upgrade process to avoid unnecessary error messages, and improving error handling in the buy_upgrade function. These updates ensure a smoother and more efficient upgrading experience in the Hamster Kombat Clicker game.
 
@@ -97,11 +104,9 @@ This project is licensed under the `NONE` License.
 If you have any questions or suggestions, please feel free to contact us at [ https://t.me/itsjaw_real ].
 
 ## Thanks to
+
 Template based by - https://github.com/akasakaid
 
 Full Source code by YOU 💘 (users of this scripts)
 
-### Buy me Coffee ☕ 
-```
-0x705C71fc031B378586695c8f888231e9d24381b4 - EVM
-```
+
