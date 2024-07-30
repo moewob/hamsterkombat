@@ -82,7 +82,7 @@ def exhausted(token):
                     log(hju + f"Tapping {kng}{tap_count:>4,}, {bru}remaining {pth}{available_taps:<4,}", flush=True)
 
                     if tapDelay:
-                        countdown_timer(randint(1, 4))
+                        countdown_timer(randint(5, 8))
                     else:
                         time.sleep(0.1)
                 else:
@@ -181,12 +181,20 @@ def upgrade_passive(token, _method):
     if _method == '1':
         upg_sort = sorted(
             [u for u in upgrades if u['price'] <= max_price and u['price'] > 0],
-            key=lambda x: -x['profitPerHour'] / x['price'] if x['price'] > 0 else 0
+            key=lambda x: -x['profitPerHour'] / x['price'] if x['price'] > 0 else 0,
+            reverse=False
         )
     elif _method == '2':
         upg_sort = sorted(
-            [u for u in upgrades if u['price'] <= max_price],
-            key=lambda x: x['price']
+            [u for u in upgrades if u['price'] <= max_price and u['profitPerHour'] > 0 and u.get("price", 0) > 0],
+            key=lambda x: x['price'] / x["profitPerHour"] if x['profitPerHour'] > 0 else float('inf'),
+            reverse=False
+        )
+    elif _method == '4':
+        upg_sort = sorted(
+            [u for u in upgrades if u['price'] <= max_price and u['price'] > 0 and u.get("profitPerHour", 0) > 0],
+            key=lambda x: x["profitPerHour"] / x["price"] if x['profitPerHour'] > 0 else float('inf'),
+            reverse=True
         )
     elif _method == '3':
         upg_sort = [u for u in upgrades if u['price'] <= balance_coins and u['price'] <= max_price]
@@ -194,37 +202,51 @@ def upgrade_passive(token, _method):
             log(mrh + f"No upgrade available less than balance\r", flush=True)
             return
     else:
-        log(mrh + "Invalid option please try again", flush=True)
+        log(mrh + "Invalid option, please try again", flush=True)
         return
 
     if not upg_sort:
         log(kng + f"No upgrades available under the Max Price\r", flush=True)
         return
 
+    any_upgrade_attempted = False
     upgrades_purchased = False
+    while True:
+        for upgrade in upg_sort:
+            if upgrade['isAvailable'] and not upgrade['isExpired']:
+                log(f"{hju}Trying to upgrade {pth}{upgrade['name']}", flush=True, end='\r')
 
-    for upgrade in upg_sort:
-        if upgrade['isAvailable'] and not upgrade['isExpired']:
-            log(f"{hju}Trying to upgrade {pth}{upgrade['name']}", flush=True, end='\r')
-
-            status = buy_upgrade(
-                token, 
-                upgrade['id'], 
-                upgrade['name'], 
-                upgrade['level'], 
-                upgrade['profitPerHour'], 
-                upgrade['price']
+                status = buy_upgrade(
+                    token, 
+                    upgrade['id'], 
+                    upgrade['name'], 
+                    upgrade['level'], 
+                    upgrade['profitPerHour'], 
+                    upgrade['price']
                 )
+                
+                if status == 'insufficient_funds':
+                    clicker_data = _sync(token)
+                    if 'clickerUser' in clicker_data:
+                        user_info = clicker_data['clickerUser']
+                        balance_coins = user_info['balanceCoins']
+                        log(mrh + f"Balance after : {pth}{_number(balance_coins)}")
+                    return
+                elif status == 'success':
+                    upgrades_purchased = True
+                    continue
+                else:
+                    
+                    continue
+        
+        if not any_upgrade_attempted:
+            log(bru + f"Not available under max price of {max_price}\r", flush=True)
+            break
+        elif not upgrades_purchased:
+            any_upgrade_attempted = True
+            log(bru + f"All availabe after cooldown \r", flush=True)
             
-            if status == 'insufficient_funds':
-                break
-            elif status == 'success':
-                upgrades_purchased = True
-                continue
-            else:
-                continue
-    if not upgrades_purchased:
-        log(bru + f"Not available under max price of {max_price}\r", flush=True)
+
 
 def claim_daily_combo(token: str) -> dict:
     url = 'https://api.hamsterkombatgame.io/clicker/claim-daily-combo'
@@ -279,7 +301,7 @@ def buy_upgrade(token: str, upgrade_id: str, upgrade_name: str, level: int, prof
     if res.status_code == 200:
         log(hju + f"Success {bru}| Level {pth}+{level} | +{kng}{_number(profitPerHour)}{pth}/h         \r", flush=True)
         if delayUpgrade:
-            countdown_timer(randint(2, 6))
+            countdown_timer(randint(5, 8))
         else:
             time.sleep(0.3)
         return 'success'
@@ -437,4 +459,3 @@ def claim_key(token):
         error_message = claim_response.json().get("error_message", "Unknown Error")
         log(mrh + f"Failed to claim daily keys minigame: {claim_response.status_code}, {error_message}")
         return
- 

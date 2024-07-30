@@ -53,7 +53,8 @@ def show_upgrade_menu():
 {kng} 1. {pth}highest profit {hju}[ enchanced ]{reset}
 {kng} 2. {pth}lowest price{reset}
 {kng} 3. {pth}price less than balance{reset}
-{kng} 4. {pth}back to {bru}main menu{reset}
+{kng} 4. {pth}upgrade by payback{reset}
+{kng} 5. {pth}back to {bru}main menu{reset}
 
 {kng} [INFO]{reset} you set Max Price to : {pth}{_number(max_price)}{reset}
     """
@@ -79,7 +80,7 @@ def main():
                 auto_upgrade = not auto_upgrade
                 if auto_upgrade:
                     _method = show_upgrade_menu()
-                    if _method not in ['1', '2', '3']:
+                    if _method not in ['1', '2', '3', '4']:
                         auto_upgrade = False
             elif choice == '2':
                 combo_upgrade = not combo_upgrade
