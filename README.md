@@ -24,7 +24,7 @@ BIKE-2GR-36HC-0DJF-67F
 BIKE-1HG-3QQ0-0NGZ-BVV
   ```
 
-`LOOKING FOR FREE 10 PROMO CODE? just DM [t.me/itsjaw_real](https://t.me/itsjaw_real)`
+`LOOKING FOR FREE 10 PROMO CODE?` just DM [t.me/itsjaw_real](https://t.me/itsjaw_real)
 
 Add configuration setting on `config.json` 
 
