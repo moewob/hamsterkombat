@@ -14,7 +14,7 @@ UQBy7ICXV6qFGeFTRWSpnMtoH6agYF3PRa5nufcTr3GVOPri - TON
 in this update we got a lot of feedback from you guys and some of them have been applied in this update. which there may be many updates to come.
 
 1. User agent is not random but static on each account
-2. Split tap tap is no longer default when starting the bot 3.
+2. Split tap tap is no longer default when starting the bot.
 3. addition of redeem promotion codes for bicycle games. 
 
 add your promo code on `promo.txt` example :
