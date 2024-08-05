@@ -7,6 +7,7 @@ from src.utils import load_tokens
 from src.auth import get_token, authenticate
 from src.exceptions import upgrade_passive, claim_daily, execute, boost, clicker_config
 from src.exceptions import _sync, exhausted, execute_combo, claim_cipher, claim_key
+from src.promo import redeem_promo
 
 from src.__init__ import (
     mrh, pth, hju, kng, htm, bru,  reset, 
@@ -21,20 +22,22 @@ config = read_config()
 def get_status(status):
     return Fore.GREEN + "ON" + Style.RESET_ALL if status else Fore.RED + "OFF" + Style.RESET_ALL
 
-def show_menu(auto_upgrade, combo_upgrade, daily_cipher_on, claim_key_on, tasks_on):
+def show_menu(auto_upgrade, taps_on, combo_upgrade, daily_cipher_on, claim_key_on, tasks_on, promo_on):
     _clear()
     _banner()
     menu = f"""
 {kng} Configurations :{reset}
 {kng}  1.{reset} Auto Buy Upgrade           : {get_status(auto_upgrade)}
-{kng}  2.{reset} Auto Complete Combo        : {get_status(combo_upgrade)}
-{kng}  3.{reset} Auto Complete Cipher       : {get_status(daily_cipher_on)}
-{kng}  4.{reset} Auto Complete Mini Game    : {get_status(claim_key_on)}
-{kng}  5.{reset} Auto Complete Tasks        : {get_status(tasks_on)}
-{kng}  6.{reset} {hju}Start Bot {kng}(default){reset}
-{kng}  7.{reset} {mrh}Exit{reset}
+{kng}  2.{reset} Auto Taps Taps             : {get_status(taps_on)}
+{kng}  3.{reset} Auto Complete Combo        : {get_status(combo_upgrade)}
+{kng}  4.{reset} Auto Complete Cipher       : {get_status(daily_cipher_on)}
+{kng}  5.{reset} Auto Complete Mini Game    : {get_status(claim_key_on)}
+{kng}  6.{reset} Auto Complete Tasks        : {get_status(tasks_on)}
+{kng}  7.{reset} Auto Redeem Promo          : {get_status(promo_on)}
+{mrh}\n  [INFO]{reset} {kng}add configuration {bru}and {hju}start the bot\n{reset}
+{kng}  0.{reset} {hju}Start Bot {kng}(default){reset}
+{kng}  99.{reset} {mrh}Reset{reset}
 
-{kng} [INFO]{reset} By default will do {hju}taps, boost & streak{reset}
     """
     print(menu)
     choice = input(" Enter your choice (1/2/3/4/5/6): ")
@@ -45,7 +48,7 @@ def show_upgrade_menu():
     _clear()
     _banner()
     config = read_config()
-    max_price = config.get('max_price', 10000000)
+    MAXIMUM_PRICE = config.get('MAXIMUM_PRICE', 1000000)
     menu = f"""
 {hju} Active Menu {kng}'Auto Buy Upgrade'{reset}
 {htm} {'~' * 50}{reset}
@@ -56,26 +59,32 @@ def show_upgrade_menu():
 {kng} 4. {pth}upgrade by payback{reset}
 {kng} 5. {pth}back to {bru}main menu{reset}
 
-{kng} [INFO]{reset} you set Max Price to : {pth}{_number(max_price)}{reset}
+{kng} [INFO]{reset} you set Max Price to : {pth}{_number(MAXIMUM_PRICE)}{reset}
     """
     print(menu)
     choice = input(" Enter your choice (1/2/3/4): ")
     return choice
 
+def load_tokens(file_path):
+    with open(file_path, 'r') as file:
+        return [line.strip() for line in file if line.strip()]
+
 def main():
     auto_upgrade = False
+    taps_on = False
     combo_upgrade = False
     daily_cipher_on = False
     claim_key_on = False
     tasks_on = False
+    promo_on = False
 
     cek_task_dict = {}
-    countPerAccount = config.get('DelayPerAccount', 3)
-    loop = config.get('loop', 3600)
+    DELAY_EACH_ACCOUNT = config.get('DELAY_EACH_ACCOUNT', 0)
+    LOOP_COUNTDOWN = config.get('LOOP_COUNTDOWN', 0)
 
     while True:
         try:
-            choice = show_menu(auto_upgrade, combo_upgrade, daily_cipher_on, claim_key_on, tasks_on)
+            choice = show_menu(auto_upgrade, taps_on, combo_upgrade, daily_cipher_on, claim_key_on, tasks_on, promo_on)
             if choice == '1':
                 auto_upgrade = not auto_upgrade
                 if auto_upgrade:
@@ -83,22 +92,27 @@ def main():
                     if _method not in ['1', '2', '3', '4']:
                         auto_upgrade = False
             elif choice == '2':
-                combo_upgrade = not combo_upgrade
+                taps_on = not taps_on
             elif choice == '3':
-                daily_cipher_on = not daily_cipher_on
+                combo_upgrade = not combo_upgrade
             elif choice == '4':
-                claim_key_on = not claim_key_on
+                daily_cipher_on = not daily_cipher_on
             elif choice == '5':
-                tasks_on = not tasks_on
+                claim_key_on = not claim_key_on
             elif choice == '6':
+                tasks_on = not tasks_on
+            elif choice == '7':
+                promo_on = not promo_on
+            elif choice == '0':
                 while True:
                     init_data_list = load_tokens('tokens.txt')
                     
-                    for init_data in init_data_list:
-                        token = get_token(init_data)
+                    for idx, init_data in enumerate(init_data_list):
+                        account = f"account_{idx + 1}"
+                        token = get_token(init_data, account)
                         if token:
                             try:
-                                res = authenticate(token)
+                                res = authenticate(token, account)
                                 if res.status_code == 200:
                                     user_data = res.json()
                                     username = user_data.get('telegramUser', {}).get('username', 'Please set username first')
@@ -115,10 +129,13 @@ def main():
                                         log(hju + f"Income: {pth}{_number(earn_passive_per_hour)}/h")
                                         log(hju + f"CEO of {pth}{exchange_name} {hju}exchange")
                                     claim_daily(token)
-                                    while True:
-                                        exhausted(token)
-                                        if not boost(token):
-                                            break
+                                    if taps_on:
+                                        while True:
+                                            exhausted(token)
+                                            if not boost(token):
+                                                break
+                                    if promo_on:
+                                        redeem_promo(token)
                                     if tasks_on:
                                         execute(token, cek_task_dict)
                                     if daily_cipher_on:
@@ -130,14 +147,13 @@ def main():
                                     if auto_upgrade:
                                         upgrade_passive(token, _method)  
                                 log_line()
-                                countdown_timer(countPerAccount)
+                                countdown_timer(DELAY_EACH_ACCOUNT)
                             except requests.RequestException as e:
                                 log(mrh + f"Request exception for token {pth}{token[:4]}****: {str(e)}")
                         else:
                             log(mrh + f"Failed to login token {pth}{token[:4]}*********\n", flush=True)
-                    countdown_timer(loop)
-            elif choice == '7':
-                log(mrh + f"Successfully logged out of the bot\n")
+                    countdown_timer(LOOP_COUNTDOWN)
+            elif choice == '99':
                 break
             else:
                 log("Invalid choice. Please try again.")

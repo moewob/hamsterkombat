@@ -10,37 +10,62 @@ TDTtTc4hSnK9ii1VDudZij8FVK2ZtwChja - TRON
 UQBy7ICXV6qFGeFTRWSpnMtoH6agYF3PRa5nufcTr3GVOPri - TON
 ```
 
-# Latest update // 25-07-2024
-These changes enhance the script by adding a `Maximum Price Filter Include on Upgrade & Combo` for upgrades `FULL Auto Complete Daily Combo`, `FULL Auto Complete Daily Morse`, `FULL Auto Complete Minigame`, `Fake userAgent` , refining the upgrade process to avoid unnecessary error messages, and improving error handling in the buy_upgrade function. These updates ensure a smoother and more efficient upgrading experience in the Hamster Kombat Clicker game.
+# Latest update // 6-08-2024
+in this update we got a lot of feedback from you guys and some of them have been applied in this update. which there may be many updates to come.
+
+1. User agent is not random but static on each account
+2. Split tap tap is no longer default when starting the bot 3.
+3. addition of redeem promotion codes for bicycle games. 
+
+add your promo code on `promo.txt` example :
+  ```bash
+BIKE-0H4-1BP0-0BH7-52H
+BIKE-2GR-36HC-0DJF-67F
+BIKE-1HG-3QQ0-0NGZ-BVV
+  ```
+
+Looking for free 100 code? just DM t.me/imspecials / t.me/itsjaw_real
 
 Add configuration setting on `config.json` 
 
-**bool** | tapDelay : `true` or `false` 
+**bool** | TAP_DELAY : `true` or `false` 
 
-**bool** | ClaimKeysDelay : `true` or `false` 
+**bool** | CLAIM_KEY_DELAY : `true` or `false` 
 
-**bool** | delayUpgrade : `true` or `false` 
+**bool** | DELAY_UPGRADE : `true` or `false` 
   ```bash
 {
-    "min_tap": 1038,
-    "max_tap": 1800,
-    "DelayPerAccount": 5,
-    "tapDelay": true,
-    "ClaimKeysDelay": true,
-    "delayUpgrade": false,
-    "max_price": 5000000,
-    "loop": 3800
+    "MINIMUM_TAP": 438,
+    "MAXIMUM_TAP": 1200,
+
+    "TAP_DELAY": true,
+    "MIN_TAP_DELAY": 5,
+    "MAX_TAP_DELAY": 7,
+
+    "CLAIM_KEY_DELAY": true,
+    "MIN_CLAIM_KEY_DELAY": 7,
+    "MAX_CLAIM_KEY_DELAY": 11,
+
+    "DELAY_UPGRADE": true,
+    "MIN_DELAY_UPGRADE": 3,
+    "MAX_DELAY_UPGRADE": 5,
+
+    "DELAY_EACH_ACCOUNT": 5,
+    "MAXIMUM_PRICE": 5000000,
+    "LOOP_COUNTDOWN": 3800
 }
   ```
 ## Features
-- Auto Buy Upgrade (with 3 method options) - `ON/OFF` enhanced on `25-07-2024`
-- Auto Complete Daily Combo - `ON/OFF` enhanced on `25-07-2024`
-- Auto Complete Daily Morse - `ON/OFF` enhanced on `16-07-2024`
-- Auto Complete Mini Game - `ON/OFF` `NEW`
+- Auto Buy Upgrade (with 3 method options) - `ON/OFF`
+- Auto Taps Taps - `ON/OFF`
+- Auto Complete Daily Combo - `ON/OFF`
+- Auto Complete Daily Morse - `ON/OFF`
 - Auto Complete Tasks - `ON/OFF`
+- Auto Complete Mini Game - `ON/OFF` `NEW`
+- Auto Redeem Promo codes - `ON/OFF` `NEW`
 - Auto Energy Boost (6x / day) - `Auto ON`
-- Random UserAgent - `Auto ON`
-- By default without config will execute `Taps, Boost & Daily Streak`
+- Static UserAgent - `Auto ON` `NEW`
+- By default without config will execute `Boost & Daily Streak`
 
 ##  Auto Upgrade metode
   1. Upgrade items with the **highest profit**

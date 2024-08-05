@@ -65,12 +65,14 @@ def exhausted(token):
             user_info = clicker_data['clickerUser']
             available_taps = user_info['availableTaps']
             max_taps = user_info['maxTaps']
-            min_tap = config.get('min_tap', 0)
-            max_tap = config.get('max_tap', max_taps)
-            tapDelay = config.get('tapDelay', False)
+            TAP_DELAY = config.get('TAP_DELAY', False)
+            MIN_TAP_DELAY = config.get('MIN_TAP_DELAY', 0)
+            MAX_TAP_DELAY = config.get('MAX_TAP_DELAY', max_taps)
+            MINIMUM_TAP = config.get('MINIMUM_TAP',0)
+            MAXIMUM_TAP = config.get('MAXIMUM_TAP',1)
             log(hju + f"Total {pth}{available_taps:>2,} {hju}Energy available\r")
             while available_taps > 100:
-                tap_count = randint(min_tap, max_tap)
+                tap_count = randint(MINIMUM_TAP, MAXIMUM_TAP)
                 
                 if tap_count > available_taps:
                     tap_count = available_taps
@@ -81,12 +83,12 @@ def exhausted(token):
                     available_taps -= tap_count
                     log(hju + f"Tapping {kng}{tap_count:>4,}, {bru}remaining {pth}{available_taps:<4,}", flush=True)
 
-                    if tapDelay:
-                        countdown_timer(randint(5, 8))
+                    if TAP_DELAY:
+                        countdown_timer(randint(MIN_TAP_DELAY, MAX_TAP_DELAY))
                     else:
                         time.sleep(0.1)
                 else:
-                    log("Failed to make a tap\r")
+                    log(mrh + "Failed to make a tap\r")
                     break
             break
         else:
@@ -148,8 +150,6 @@ def boost(token):
     if res.status_code == 200:
         res_data = res.json()
         if 'cooldownSeconds' in res_data:
-            cooldown = res_data['cooldownSeconds']
-            log(f"{kng}Boost cooldown: {kng}{cooldown} seconds remaining.")
             return False
         else:
             log(f"{hju}Boost {kng}successfully applied!")
@@ -161,7 +161,7 @@ def boost(token):
         return False
 
 def upgrade_passive(token, _method):
-    max_price = config.get('max_price', 10000000)
+    MAXIMUM_PRICE = config.get('MAXIMUM_PRICE', 10000000)
 
     clicker_data = _sync(token)
     if 'clickerUser' in clicker_data:
@@ -176,28 +176,28 @@ def upgrade_passive(token, _method):
         log(mrh + f"\rFailed to get data or no upgrades available\r", flush=True)
         return
 
-    log(bru + f"Total upgrades available: {pth}{len(upgrades)}", flush=True)
+    log(bru + f"Total card available: {pth}{len(upgrades)}", flush=True)
 
     if _method == '1':
         upg_sort = sorted(
-            [u for u in upgrades if u['price'] <= max_price and u['price'] > 0],
+            [u for u in upgrades if u['price'] <= MAXIMUM_PRICE and u['price'] > 0],
             key=lambda x: -x['profitPerHour'] / x['price'] if x['price'] > 0 else 0,
             reverse=False
         )
     elif _method == '2':
         upg_sort = sorted(
-            [u for u in upgrades if u['price'] <= max_price and u['profitPerHour'] > 0 and u.get("price", 0) > 0],
+            [u for u in upgrades if u['price'] <= MAXIMUM_PRICE and u['profitPerHour'] > 0 and u.get("price", 0) > 0],
             key=lambda x: x['price'] / x["profitPerHour"] if x['profitPerHour'] > 0 else float('inf'),
             reverse=False
         )
     elif _method == '4':
         upg_sort = sorted(
-            [u for u in upgrades if u['price'] <= max_price and u['price'] > 0 and u.get("profitPerHour", 0) > 0],
+            [u for u in upgrades if u['price'] <= MAXIMUM_PRICE and u['price'] > 0 and u.get("profitPerHour", 0) > 0],
             key=lambda x: x["profitPerHour"] / x["price"] if x['profitPerHour'] > 0 else float('inf'),
             reverse=True
         )
     elif _method == '3':
-        upg_sort = [u for u in upgrades if u['price'] <= balance_coins and u['price'] <= max_price]
+        upg_sort = [u for u in upgrades if u['price'] <= balance_coins and u['price'] <= MAXIMUM_PRICE]
         if not upg_sort:
             log(mrh + f"No upgrade available less than balance\r", flush=True)
             return
@@ -206,7 +206,7 @@ def upgrade_passive(token, _method):
         return
 
     if not upg_sort:
-        log(kng + f"No upgrades available under the Max Price\r", flush=True)
+        log(bru + f"No {pth}item {bru}available under {pth}{_number(MAXIMUM_PRICE)}\r", flush=True)
         return
 
     any_upgrade_attempted = False
@@ -214,8 +214,6 @@ def upgrade_passive(token, _method):
     while True:
         for upgrade in upg_sort:
             if upgrade['isAvailable'] and not upgrade['isExpired']:
-                log(f"{hju}Trying to upgrade {pth}{upgrade['name']}", flush=True, end='\r')
-
                 status = buy_upgrade(
                     token, 
                     upgrade['id'], 
@@ -236,17 +234,13 @@ def upgrade_passive(token, _method):
                     upgrades_purchased = True
                     continue
                 else:
-                    
                     continue
         
         if not any_upgrade_attempted:
-            log(bru + f"Not available under max price of {max_price}\r", flush=True)
+            log(bru + f"No {pth}item {bru}available under {pth}{_number(MAXIMUM_PRICE)}\r", flush=True)
             break
         elif not upgrades_purchased:
             any_upgrade_attempted = True
-            log(bru + f"All availabe after cooldown \r", flush=True)
-            
-
 
 def claim_daily_combo(token: str) -> dict:
     url = 'https://api.hamsterkombatgame.io/clicker/claim-daily-combo'
@@ -295,13 +289,15 @@ def buy_upgrade(token: str, upgrade_id: str, upgrade_name: str, level: int, prof
     headers = get_headers(token)
     data = json.dumps({"upgradeId": upgrade_id, "timestamp": int(time.time())})
     res = requests.post(url, headers=headers, data=data)
-    delayUpgrade = config.get('delayUpgrade', False)
-    log(bru + f"Card {hju}name {pth}{upgrade_name}           \r", flush=True)
-    log(bru + f"Card {hju}price{pth} {_number(price)}          \r", flush=True)
+    DELAY_UPGRADE = config.get('DELAY_UPGRADE', False)
+    MIN_DELAY_UPGRADE = config.get('MIN_DELAY_UPGRADE',0)
+    MAX_DELAY_UPGRADE = config.get('MAX_DELAY_UPGRADE',1)
+    log(bru + f"Card {hju}name {pth}{upgrade_name}    \r", flush=True)
+    log(bru + f"Card {hju}price{pth} {_number(price)}       \r", flush=True)
     if res.status_code == 200:
         log(hju + f"Success {bru}| Level {pth}+{level} | +{kng}{_number(profitPerHour)}{pth}/h         \r", flush=True)
-        if delayUpgrade:
-            countdown_timer(randint(5, 8))
+        if DELAY_UPGRADE:
+            countdown_timer(randint(MIN_DELAY_UPGRADE, MAX_DELAY_UPGRADE))
         else:
             time.sleep(0.3)
         return 'success'
@@ -312,13 +308,13 @@ def buy_upgrade(token: str, upgrade_id: str, upgrade_name: str, level: int, prof
             return 'insufficient_funds'
         elif error_res.get('error_code') == 'UPGRADE_COOLDOWN':
             cooldown_time = error_res.get('cooldownSeconds')
-            log(bru + f"Card {kng}cooldown for {pth}{cooldown_time} {kng}seconds.          ", flush=True)
+            log(bru + f"Card {kng}cooldown for {pth}{cooldown_time} {kng}seconds.       ", flush=True)
             return 'cooldown'
         elif error_res.get('error_code') == 'UPGRADE_MAX_LEVEL':
             log(bru + f"Card {kng}is already on max level  ", flush=True)
             return 'max_level'
         elif error_res.get('error_code') == 'UPGRADE_NOT_AVAILABLE':
-            log(bru + f"Card {mrh}not meet requirements    ", flush=True)
+            log(bru + f"Not Meet{mrh} requirements to buy card", flush=True)
             return 'not_available'
         elif error_res.get('error_code') == 'UPGRADE_HAS_EXPIRED':
             log(bru + f"Card {kng}has expired you'are late      ", flush=True)
@@ -330,9 +326,9 @@ def buy_upgrade(token: str, upgrade_id: str, upgrade_name: str, level: int, prof
 def execute_combo(token: str):
     combo_data = get_combo_cards()
     combo_purchased = True
-    max_price = config.get('max_price',50000000)
+    MAXIMUM_PRICE = config.get('MAXIMUM_PRICE',1000000)
     if not combo_data:
-        log(mrh + "Failed to retrieve combo data.")
+        log(mrh + f"Failed to retrieve combo data.")
         return
 
     not_ready_combo = []
@@ -358,7 +354,7 @@ def execute_combo(token: str):
         upgrade_price_dict = next((u for u in upgrades if u['price']), None)
         if upgrade_price_dict:
             upgrade_price = upgrade_price_dict['price']
-            if upgrade_price > max_price:
+            if upgrade_price > MAXIMUM_PRICE:
                 log(kng + f"Price combo is over max price")
                 return
         if upgrade_details is None:
@@ -374,11 +370,9 @@ def execute_combo(token: str):
             upgrade_details['price']
         )
         if status == 'success':
-            log(bru + f"Executed combo {pth}{combo_item}", flush=True)
             time.sleep(1)
         else:
             combo_purchased = False
-            log(mrh + f"Execute combo {pth}{combo_item}", flush=True)
             time.sleep(1)
             break
     if combo_purchased:
@@ -402,13 +396,11 @@ def claim_cipher(token):
 
     decoded_cipher = decode_cipher(cipher=daily_cipher['cipher'])
     data = {"cipher": decoded_cipher}
-    log(f"{hju}Today morse is {pth}'{decoded_cipher}'\r", flush=True)
-
     res_claim = requests.post(url, headers=headers, json=data)
     
     if res_claim.status_code == 200:
         if res_claim.json().get('dailyCipher', {}).get('isClaimed', True):
-            log(f"{hju}Successfully claimed morse.", flush=True)
+            log(f"{hju}Successfully claim morse {pth}'{decoded_cipher}'", flush=True)
             return True
         else:
             log(f"{mrh}Failed to claim morse.", flush=True)
@@ -419,7 +411,9 @@ def claim_cipher(token):
 
 def claim_key(token):
     headers = get_headers(token)
-    ClaimKeysDelay = config.get('ClaimKeysDelay', False)
+    CLAIM_KEY_DELAY = config.get('CLAIM_KEY_DELAY', False)
+    MIN_CLAIM_KEY_DELAY = config.get('MIN_CLAIM_KEY_DELAY',0)
+    MAX_CLAIM_KEY_DELAY = config.get('MAX_CLAIM_KEY_DELAY',1)
     sync_response = requests.post("https://api.hamsterkombatgame.io/clicker/sync", headers=headers)
     user_id = str(sync_response.json()["clickerUser"]["id"])
     encoded_cipher = base64.b64encode(f"0300000000|{user_id}".encode()).decode()
@@ -434,9 +428,9 @@ def claim_key(token):
             log(mrh + f"Failed to start keys minigame: {start_response.status_code}, {start_response.text}")
             return
 
-    log(bru + f"Checking Minigame {kng}please wait..")
-    if ClaimKeysDelay:
-        countdown_timer(randint(7, 15))
+    log(hju + f"Checking Minigame {pth}please wait..")
+    if CLAIM_KEY_DELAY:
+        countdown_timer(randint(MIN_CLAIM_KEY_DELAY, MAX_CLAIM_KEY_DELAY))
     else:
         time.sleep(0.3)
     
@@ -449,11 +443,11 @@ def claim_key(token):
         response_json = claim_response.json()
         balance_keys = response_json['clickerUser']['balanceKeys']
         bonus_keys = response_json['dailyKeysMiniGame']['bonusKeys']
-        log(hju + f"Balance Keys: {pth}{balance_keys}")
-        log(hju + f"Solved Minigame Bonus Keys: +{kng}{bonus_keys}")
+        log(hju + f"Solved minigame : +{pth}{bonus_keys} bonus keys")
+        log(hju + f"Balance keys : {pth}{balance_keys}")
         return
     elif claim_response.status_code == 400:
-        log(kng + f"Already claimed today's key before")
+        log(kng + f"Already claimed keys before")
         return
     else:
         error_message = claim_response.json().get("error_message", "Unknown Error")
