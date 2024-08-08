@@ -3,7 +3,7 @@ This is a bot that can help you to run hamsterkombat telegram bot which has quit
 
 [TELEGRAM CHANNEL](https://t.me/Deeplchain) | [TWITTER](https://x.com/itsjaw_real)
 
-### Buy me Coffee ☕ 
+### Send me a thankyou 💪 
 ```
 0x705C71fc031B378586695c8f888231e9d24381b4 - EVM
 TDTtTc4hSnK9ii1VDudZij8FVK2ZtwChja - TRON
@@ -15,24 +15,25 @@ in this update we got a lot of feedback from you guys and some of them have been
 
 1. User agent is not random but static on each account
 2. Split tap tap is no longer default when starting the bot.
-3. addition of redeem promotion codes for bicycle games. 
+3. addition of redeem promotion codes for **BIKE, CLONE, TRAIN ,CUBE** Games.
 
 add your promo code on `promo.txt` example :
   ```bash
 BIKE-0H4-1BP0-0BH7-52H
-BIKE-2GR-36HC-0DJF-67F
-BIKE-1HG-3QQ0-0NGZ-BVV
+CUBE-0SC-SKMQ-0REK-1A4
+CLONE-2RN-ZJJG-00FA-C5Q
+TRAIN-1RG-3KSZ-0YCM-GEW
   ```
+CHECK MY NEW REPOSITORY FOR PROMO CODE GENERATOR !!
+===========================================================
 
-`LOOKING FOR FREE 100 PROMO CODE?` just DM [t.me/itsjaw_real](https://t.me/itsjaw_real)
+### Add configuration setting on `config.json` 
 
-Add configuration setting on `config.json` 
+ **bool** | TAP_DELAY : `true` or `false` 
 
-**bool** | TAP_DELAY : `true` or `false` 
+ **bool** | CLAIM_KEY_DELAY : `true` or `false` 
 
-**bool** | CLAIM_KEY_DELAY : `true` or `false` 
-
-**bool** | DELAY_UPGRADE : `true` or `false` 
+ **bool** | DELAY_UPGRADE : `true` or `false` 
   ```bash
 {
     "MINIMUM_TAP": 438,
