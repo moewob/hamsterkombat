@@ -25,6 +25,7 @@ CLONE-2RN-ZJJG-00FA-C5Q
 TRAIN-1RG-3KSZ-0YCM-GEW
   ```
 CHECK MY NEW REPOSITORY FOR PROMO CODE GENERATOR !!
+https://github.com/jawikas/hamster-generator-code
 ===========================================================
 
 ### Add configuration setting on `config.json` 
