@@ -13,11 +13,11 @@ init(autoreset=True)
 ua = UserAgent()
 config = read_config()
 
-def save_user_agents(filename='user_agents.json'):
+def save_user_agents(filename='./data/user_agents.json'):
     with open(filename, 'w') as f:
         json.dump(user_agents, f, indent=4)
 
-def load_user_agents(filename='user_agents.json'):
+def load_user_agents(filename='./data/user_agents.json'):
     try:
         with open(filename, 'r') as f:
             return json.load(f)

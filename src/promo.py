@@ -3,7 +3,7 @@ from collections import defaultdict
 from src.utils import get_headers
 from src.__init__ import countdown_timer, log, hju, kng, mrh, pth, bru
 
-def load_promo(filename='promo.txt'):
+def load_promo(filename='./data/promo.txt'):
     with open(filename, 'r') as file:
         promo_codes = [line.strip() for line in file]
     promo_dict = defaultdict(list)
@@ -12,7 +12,7 @@ def load_promo(filename='promo.txt'):
         promo_dict[code_type].append(code)
     return promo_dict
 
-def save_promo(promo_dict, filename='promo.txt'):
+def save_promo(promo_dict, filename='./data/promo.txt'):
     with open(filename, 'w') as file:
         for code_list in promo_dict.values():
             for code in code_list:
@@ -63,6 +63,8 @@ def redeem_promo(token):
                 http_error_tracker[code_type] += 1
                 if http_error_tracker[code_type] >= max_http_errors:
                     log(pth + f"{code_type} {hju}Assuming maximum redemption")
+                    codes.pop(0)
+                    save_promo(promo_dict)
                     attempts_tracker[code_type] = max_attempts
             except Exception as err:
                 log(mrh + f"Error: {err}. Promo code: {promo_code}")

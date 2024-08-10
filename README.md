@@ -3,19 +3,28 @@ This is a bot that can help you to run hamsterkombat telegram bot which has quit
 
 [TELEGRAM CHANNEL](https://t.me/Deeplchain) | [TWITTER](https://x.com/itsjaw_real)
 
-### Send me a thankyou 💪 
+### This bot helpfull?  Please support me by buying me a coffee: 
 ```
 0x705C71fc031B378586695c8f888231e9d24381b4 - EVM
 TDTtTc4hSnK9ii1VDudZij8FVK2ZtwChja - TRON
 UQBy7ICXV6qFGeFTRWSpnMtoH6agYF3PRa5nufcTr3GVOPri - TON
 ```
 
-# Latest update // 6-08-2024
-in this update we got a lot of feedback from you guys and some of them have been applied in this update. which there may be many updates to come.
+### Changes Summary: // 11-08-2024
+- **Loading setup via CLI argument:** If the `--setup` argument is provided, the script will load the corresponding `.json` file and run the bot directly without displaying the menu.
+- **Menu display:** If no `--setup` argument is provided, the script will display the menu as usual.
+- **Setup saving:** The option to save setups has been included in the menu as option `8`.
 
-1. User agent is not random but static on each account
-2. Split tap tap is no longer default when starting the bot.
-3. addition of redeem promotion codes for **BIKE, CLONE, TRAIN ,CUBE** Games.
+This will allow you to run the script directly with a predefined setup like this:
+
+```bash
+python main.py --setup mysetup
+```
+
+1. Add Fake IPS/ISP info (configurable on config.json) `NEW`
+2. User agent is not random but static on each account
+3. Split tap tap is no longer default when starting the bot.
+4. addition of redeem promotion codes for **BIKE, CLONE, TRAIN ,CUBE** Games.
 
 add your promo code on `promo.txt` example :
   ```bash
@@ -30,13 +39,12 @@ https://github.com/jawikas/hamster-generator-code
 
 ### Add configuration setting on `config.json` 
 
- **bool** | TAP_DELAY : `true` or `false` 
+ **bool** : `true` or `false` | FAKE_IP/S_INFO, TAP_DELAY,CLAIM_KEY_DELAY, DELAY_UPGRADE  
 
- **bool** | CLAIM_KEY_DELAY : `true` or `false` 
-
- **bool** | DELAY_UPGRADE : `true` or `false` 
   ```bash
 {
+    "FAKE_IP/S_INFO": true,
+    
     "MINIMUM_TAP": 438,
     "MAXIMUM_TAP": 1200,
 
@@ -49,15 +57,17 @@ https://github.com/jawikas/hamster-generator-code
     "MAX_CLAIM_KEY_DELAY": 11,
 
     "DELAY_UPGRADE": true,
-    "MIN_DELAY_UPGRADE": 3,
-    "MAX_DELAY_UPGRADE": 5,
+    "MIN_DELAY_UPGRADE": 4,
+    "MAX_DELAY_UPGRADE": 6,
 
     "DELAY_EACH_ACCOUNT": 5,
-    "MAXIMUM_PRICE": 5000000,
+    "MAXIMUM_PRICE": 10000000,
     "LOOP_COUNTDOWN": 3800
 }
+
   ```
 ## Features
+- Auto Energy Boost (6x / day) - `Auto ON` if Taps Taps **ON**
 - Auto Buy Upgrade (with 3 method options) - `ON/OFF`
 - Auto Taps Taps - `ON/OFF`
 - Auto Complete Daily Combo - `ON/OFF`
@@ -65,14 +75,14 @@ https://github.com/jawikas/hamster-generator-code
 - Auto Complete Tasks - `ON/OFF`
 - Auto Complete Mini Game - `ON/OFF` `NEW`
 - Auto Redeem Promo codes - `ON/OFF` `NEW`
-- Auto Energy Boost (6x / day) - `Auto ON`
 - Static UserAgent - `Auto ON` `NEW`
-- By default without config will execute `Boost & Daily Streak`
+- Easily save and run your setup `NEW`
 
 ##  Auto Upgrade metode
   1. Upgrade items with the **highest profit**
   2. Upgrade items at the **lowest price**
   3. Upgrade items with a **price less than balance**
+  4. Upgrade item with the **highest payback**
 
 ## Prerequisites
 Before installing and running this project, make sure you have the following prerequisites:
@@ -132,10 +142,8 @@ This project is licensed under the `NONE` License.
 ## Contact
 If you have any questions or suggestions, please feel free to contact us at [ https://t.me/itsjaw_real ].
 
-## Thanks to
+## Thanks to :
 
-Template based by - https://github.com/akasakaid
-
-Full Source code by YOU 💘 (users of this scripts)
+YOU 💘 (Full Source code by users of this scripts)
 
 

@@ -9,5 +9,6 @@ if __name__ == "__main__":
             _banner()
             main()
         except KeyboardInterrupt:
+            print()
             log(mrh + f"Successfully logged out of the bot\n")
             sys.exit()

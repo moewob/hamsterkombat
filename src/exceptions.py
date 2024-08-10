@@ -1,4 +1,5 @@
 import json
+import random
 import time
 import base64
 from random import randint
@@ -443,7 +444,7 @@ def claim_key(token):
         response_json = claim_response.json()
         balance_keys = response_json['clickerUser']['balanceKeys']
         bonus_keys = response_json['dailyKeysMiniGame']['bonusKeys']
-        log(hju + f"Solved minigame : +{pth}{bonus_keys} bonus keys")
+        log(hju + f"Solved minigame : {pth}+{bonus_keys} bonus keys")
         log(hju + f"Balance keys : {pth}{balance_keys}")
         return
     elif claim_response.status_code == 400:
@@ -453,3 +454,29 @@ def claim_key(token):
         error_message = claim_response.json().get("error_message", "Unknown Error")
         log(mrh + f"Failed to claim daily keys minigame: {claim_response.status_code}, {error_message}")
         return
+
+def gen_ip():
+    return f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}"
+
+def gen_info(fake_ips):
+    entry = random.choice(fake_ips)
+    entry['ip'] = gen_ip()
+    return entry
+
+def faking_info(token, use_fake=False, fake_ips=None):
+    url = 'https://api.hamsterkombatgame.io/ip'
+    headers = get_headers(token)
+
+    if use_fake and fake_ips:
+        return gen_info(fake_ips)
+
+    res = requests.post(url, headers=headers)
+    if res.status_code == 200:
+        try:
+            return res.json()
+        except json.JSONDecodeError:
+            print(mrh + "Failed to decode response Json", flush=True)
+            return None
+    else:
+        print(mrh + f"Failed with status code: {res.status_code}", flush=True)
+        return None

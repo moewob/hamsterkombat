@@ -54,6 +54,16 @@ def log(message, **kwargs):
 def log_line():
     print(pth + "~" * 60)
 
+def load_fake_file(filepath):
+    with open(filepath, 'r') as file:
+        fake_ips = json.load(file)
+    return fake_ips
+
+def awak():
+    _clear()
+    _banner()
+    log_line()
+
 def countdown_timer(seconds):
     while seconds:
         m, s = divmod(seconds, 60)
