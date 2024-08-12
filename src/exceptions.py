@@ -1,3 +1,4 @@
+import os
 import json
 import random
 import time
@@ -11,7 +12,7 @@ from src.utils import get_headers
 from src.__init__ import (
     read_config, 
     mrh, pth, hju, kng, bru, reset, htm, log, log_line,
-    _number, countdown_timer
+    _number, countdown_timer, load_fake_file
     )
 
 config = read_config()
@@ -348,7 +349,7 @@ def execute_combo(token: str):
     upgrades = available_upgrades(token)
     for combo_item in combo:
         if combo_item in not_ready_combo:
-            log(bru + f"Already executed {combo_item}", flush=True)
+            log(bru + f"Has executed {pth}{combo_item}", flush=True)
             continue
 
         upgrade_details = next((u for u in upgrades if u['id'] == combo_item), None)
@@ -426,7 +427,7 @@ def claim_key(token):
             log(kng + f"Likely you have claimed key's before")
             return
         else:
-            log(mrh + f"Failed to start keys minigame: {start_response.status_code}, {start_response.text}")
+            log(mrh + f"Failed to start minigame: {start_response.status_code}, {start_response.text}")
             return
 
     log(hju + f"Checking Minigame {pth}please wait..")
@@ -452,31 +453,61 @@ def claim_key(token):
         return
     else:
         error_message = claim_response.json().get("error_message", "Unknown Error")
-        log(mrh + f"Failed to claim daily keys minigame: {claim_response.status_code}, {error_message}")
+        log(mrh + f"Failed to claim minigame: {claim_response.status_code}, {error_message}")
         return
+
+FAKE_IPS_FILE = './data/isp_code.json'
+IP_INFO_FILE = './data/accounts_info.json'
 
 def gen_ip():
     return f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}"
 
 def gen_info(fake_ips):
     entry = random.choice(fake_ips)
-    entry['ip'] = gen_ip()
-    return entry
+    info = {
+        'ip': gen_ip(),
+        'country_code': entry.get('country_code', 'XX'),
+        'city_name': entry.get('city_name', 'Fake City'),
+        'latitude': entry.get('latitude', f"{random.uniform(-90.0, 90.0):.5f}"),
+        'longitude': entry.get('longitude', f"{random.uniform(-180.0, 180.0):.5f}"),
+        'asn': entry.get('asn', f"{random.randint(1000, 99999)}"),
+        'asn_org': entry.get('asn_org', 'Fake ISP Org')
+    }
+    return info
 
-def faking_info(token, use_fake=False, fake_ips=None):
+def load_all_info():
+    if os.path.exists(IP_INFO_FILE):
+        with open(IP_INFO_FILE, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_all_info(info_dict):
+    with open(IP_INFO_FILE, 'w') as f:
+        json.dump(info_dict, f, indent=4)
+
+def faking_info(token, account, use_fake=False, info_dict=None):
+    if account in info_dict:
+        return info_dict[account]
+
+    if use_fake:
+        fake_ips = load_fake_file(FAKE_IPS_FILE)
+        info = gen_info(fake_ips)
+        info_dict[account] = info
+        save_all_info(info_dict)
+        return info
+
     url = 'https://api.hamsterkombatgame.io/ip'
     headers = get_headers(token)
-
-    if use_fake and fake_ips:
-        return gen_info(fake_ips)
 
     res = requests.post(url, headers=headers)
     if res.status_code == 200:
         try:
-            return res.json()
+            info = res.json()
+            info_dict[account] = info
+            save_all_info(info_dict)
+            return info
         except json.JSONDecodeError:
-            print(mrh + "Failed to decode response Json", flush=True)
             return None
     else:
-        print(mrh + f"Failed with status code: {res.status_code}", flush=True)
+        print(f"Failed with status code: {res.status_code}", flush=True)
         return None

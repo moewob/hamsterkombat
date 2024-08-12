@@ -1,6 +1,5 @@
 import sys
 import time
-import locale
 import requests
 import argparse
 import json
@@ -8,7 +7,7 @@ from colorama import *
 from src.utils import load_tokens
 from src.auth import get_token, authenticate
 from src.exceptions import upgrade_passive, claim_daily, execute, boost, clicker_config
-from src.exceptions import _sync, exhausted, execute_combo, claim_cipher, claim_key, faking_info
+from src.exceptions import _sync, exhausted,load_all_info, execute_combo, claim_cipher, claim_key, faking_info
 from src.promo import redeem_promo
 
 from src.__init__ import (
@@ -17,7 +16,6 @@ from src.__init__ import (
     log_line, _banner, _clear, awak, load_fake_file
 )
 
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 init(autoreset=True)
 config = read_config()
 
@@ -91,36 +89,40 @@ def run_bot(auto_upgrade, taps_on, combo_upgrade, daily_cipher_on, claim_key_on,
     while True:
         try:
             init_data_list = load_tokens('tokens.txt')
+            all_info_dict = load_all_info()  # Load all saved info at startup
+
             for idx, init_data in enumerate(init_data_list):
                 account = f"account_{idx + 1}"
                 token = get_token(init_data, account)
                 if token:
                     try:
-                        fake_info = config.get('FAKE_IP/S_INFO', False)
-                        fake_ips = load_fake_file('./data/isp_code.json')
-                        fake = faking_info(token, use_fake=fake_info, fake_ips=fake_ips, )
+                        faking_infos = config.get('FAKE_IP/S_INFO', False)
 
-                        if fake:
-                            print(hju + f"IP : {pth}{fake['ip']} " +
-                                f"{hju}| ISP: {pth}{fake['asn_org']} " +
-                                f"{hju}| Country: {pth}{fake['country_code']}")
-                            log_line()
+                        if faking_infos:
+                            fake_info = faking_info(token, account, use_fake=True, info_dict=all_info_dict)
+                            if fake_info:
+                                print(f"IP: {fake_info['ip']} | ISP: {fake_info['asn_org']} | Country: {fake_info['country_code']}")
+                                print(f"City: {fake_info['city_name']} | Latitude: {fake_info['latitude']} | Longitude: {fake_info['longitude']}")
+                            else:
+                                print(mrh + f"Failed to generate fake {pth}IP/ISP {mrh}information", flush=True)
                         else:
-                            print(mrh + "Failed to faking IPS/ISP information", flush=True)
-
+                            print(kng + f"Faking information {mrh}not enabled{kng} for account {pth}{account}", flush=True)
+                            
+                        log_line()    
                         res = authenticate(token, account)
                         if res.status_code == 200:
                             user_data = res.json()
                             username = user_data.get('telegramUser', {}).get('username', 'Please set username first')
+                            log(bru + f"Number : {pth}{account}")
                             log(kng + f"Login as {pth}{username}")
                             clicker_config(token)
                             clicker_data = _sync(token)
                             if 'clickerUser' in clicker_data:
                                 user_info = clicker_data['clickerUser']
-                                balance_coins = user_info['balanceCoins']
-                                earn_passive_per_hour = user_info['earnPassivePerHour']
-                                exchange_name = user_info['exchangeId']
-                                key_balance = user_info['balanceKeys']
+                                balance_coins = user_info.get('balanceCoins', 0)
+                                earn_passive_per_hour = user_info.get('earnPassivePerHour', 0)
+                                exchange_name = user_info.get('exchangeId', 'Unknown')
+                                key_balance = user_info.get('balanceKeys', 0)
 
                                 log(hju + f"Balance: {pth}{_number(balance_coins)}")
                                 log(hju + f"Income: {pth}{_number(earn_passive_per_hour)}/h")

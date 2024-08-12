@@ -9,6 +9,8 @@ This is a bot that can help you to run hamsterkombat telegram bot which has quit
 TDTtTc4hSnK9ii1VDudZij8FVK2ZtwChja - TRON
 UQBy7ICXV6qFGeFTRWSpnMtoH6agYF3PRa5nufcTr3GVOPri - TON
 ```
+NOTE : LAST UPDATE FROM ME, SEE YOU NEXT TIME!
+===========================================================
 
 ### Changes Summary: // 11-08-2024
 - **Loading setup via CLI argument:** If the `--setup` argument is provided, the script will load the corresponding `.json` file and run the bot directly without displaying the menu.

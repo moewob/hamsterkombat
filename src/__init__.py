@@ -1,7 +1,6 @@
 # This file can be empty, it just indicates that this directory should be treated as a package
 import os
 import json
-import locale
 import time
 from datetime import datetime
 from colorama import *
@@ -15,7 +14,6 @@ reset = Style.RESET_ALL
 htm = Fore.LIGHTBLACK_EX
 
 last_log_message = None
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 def _banner():
     banner = r"""
@@ -77,4 +75,4 @@ def countdown_timer(seconds):
     print(f"{pth}please wait until {h}:{m}:{s} ", flush=True, end="\r")
 
 def _number(number):
-    return locale.format_string("%d", number, grouping=True)
+    return "{:,.0f}".format(number)

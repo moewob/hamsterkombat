@@ -20,7 +20,7 @@ def save_promo(promo_dict, filename='./data/promo.txt'):
 
 def redeem_promo(token):
     promo_dict = load_promo()
-    
+
     if not promo_dict:
         log(mrh + f"No codes available in {pth}promo.txt.")
         return
@@ -55,17 +55,32 @@ def redeem_promo(token):
                     http_error_tracker[code_type] = 0 
                 else:
                     log(kng + f"Failed to apply {pth}{promo_code}")
-                    codes.pop(0) 
+                    codes.pop(0)
                     save_promo(promo_dict)
 
             except requests.exceptions.HTTPError as e:
-                log(kng + f"Error applying {pth}{promo_code}")
-                http_error_tracker[code_type] += 1
-                if http_error_tracker[code_type] >= max_http_errors:
-                    log(pth + f"{code_type} {hju}Assuming maximum redemption")
-                    codes.pop(0)
-                    save_promo(promo_dict)
-                    attempts_tracker[code_type] = max_attempts
+                try:
+                    error_data = res.json()
+                    if error_data.get('error_code') == "MaxKeysReceived":
+                        log(pth + f"{code_type} {hju}Max keys received for today.")
+                        attempts_tracker[code_type] = max_attempts
+                    else:
+                        log(kng + f"Error applying {pth}{promo_code}: {error_data.get('error_message')}")
+                        http_error_tracker[code_type] += 1
+                        if http_error_tracker[code_type] >= max_http_errors:
+                            log(pth + f"{code_type} {hju}Assuming maximum redemption")
+                            codes.pop(0)
+                            save_promo(promo_dict)
+                            attempts_tracker[code_type] = max_attempts
+                except ValueError:
+                    log(kng + f"Error applying {pth}{promo_code}")
+                    http_error_tracker[code_type] += 1
+                    if http_error_tracker[code_type] >= max_http_errors:
+                        log(pth + f"{code_type} {hju}Assuming maximum redemption")
+                        codes.pop(0)
+                        save_promo(promo_dict)
+                        attempts_tracker[code_type] = max_attempts
+
             except Exception as err:
                 log(mrh + f"Error: {err}. Promo code: {promo_code}")
                 codes.pop(0)  

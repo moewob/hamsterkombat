@@ -35,7 +35,7 @@ def get_user_agent(account):
     
     if (current_time - last_update_time) > timedelta(minutes=change_interval):
         last_update_time = current_time
-        log(kng + f"User agents checked at {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(kng + f"User agents checked at {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
 
     if account not in user_agents:
         new_user_agent = ua.random
